@@ -19,7 +19,7 @@ try:
     import yaml
     YAML_AVAILABLE = True
 except ImportError:
-    print("⚠️  Warning: PyYAML not available. Using default configuration.")
+    print("{SYMBOLS.WARNING}  Warning: PyYAML not available. Using default configuration.")
     YAML_AVAILABLE = False
 
 # Image quality analysis imports (for demo simulation)
@@ -29,7 +29,7 @@ try:
     from scipy import ndimage
     PHOTUTILS_AVAILABLE = True
 except ImportError:
-    print("⚠️  Warning: photutils not available. Using fallback star detection method.")
+    print("{SYMBOLS.WARNING}  Warning: photutils not available. Using fallback star detection method.")
     PHOTUTILS_AVAILABLE = False
 
 class DemoSubExposureCalculator:
@@ -97,13 +97,13 @@ class DemoSubExposureCalculator:
                 try:
                     with open(config_path, 'r') as f:
                         config = yaml.safe_load(f)
-                    print(f"✅ Loaded configuration from {config_path}")
+                    print(f"{SYMBOLS.SUCCESS} Loaded configuration from {config_path}")
                     return config
                 except Exception as e:
-                    print(f"⚠️  Error loading {config_path}: {e}")
+                    print(f"{SYMBOLS.WARNING}  Error loading {config_path}: {e}")
         
         # Return default configuration if no file found
-        print("⚠️  No configuration file found, using defaults")
+        print("{SYMBOLS.WARNING}  No configuration file found, using defaults")
         return {
             'analysis': {
                 'sky_region_fraction': 0.8,
@@ -118,32 +118,32 @@ class DemoSubExposureCalculator:
     
     def simulate_device_discovery(self):
         """Simulate device discovery."""
-        print("🔌 Connecting to INDI server...")
+        print("[CONN] Connecting to INDI server...")
         time.sleep(1)
-        print("✅ Connected to INDI server successfully")
+        print("{SYMBOLS.SUCCESS} Connected to INDI server successfully")
         
-        print("🔍 Discovering INDI devices...")
+        print("[FOCUS] Discovering INDI devices...")
         time.sleep(0.5)
-        print("📷 Selected camera: ZWO CCD ASI1600MM Pro (Demo)")
-        print("🔭 Selected mount: SkyWatcher EQ6-R Pro (Demo)")
-        print("🎨 Selected filter wheel: ZWO EFW (Demo)")
-        print("🎯 Selected guide camera: ZWO ASI120MM Mini (Demo)")
-        print("🔍 Selected focuser: ZWO Focuser (Demo)")
-        print(f"🎨 Available filters: {', '.join(self.filter_names)}")
+        print("[CAM] Selected camera: ZWO CCD ASI1600MM Pro (Demo)")
+        print("[MOUNT] Selected mount: SkyWatcher EQ6-R Pro (Demo)")
+        print("[SWITCH] Selected filter wheel: ZWO EFW (Demo)")
+        print("[TARGET] Selected guide camera: ZWO ASI120MM Mini (Demo)")
+        print("[FOCUS] Selected focuser: ZWO Focuser (Demo)")
+        print(f"[SWITCH] Available filters: {', '.join(self.filter_names)}")
         
         # Simulate external guiding detection
-        print("🔍 Checking for external guiding software...")
+        print("[FOCUS] Checking for external guiding software...")
         time.sleep(0.5)
-        print("ℹ️  No external guiding software detected")
+        print("[INFO]  No external guiding software detected")
     
     def simulate_calibration(self):
         """Simulate calibration frame creation."""
-        print("\n📸 Phase 1: Calibration Frame Verification")
+        print("\n[CAM] Phase 1: Calibration Frame Verification")
         print("=" * 50)
         
         # In the intelligent scout approach, we create a dark frame library upfront
         # that covers a range of exposure times for automatic selection
-        print("📸 Creating dark frame library for intelligent scout approach...")
+        print("[CAM] Creating dark frame library for intelligent scout approach...")
         print("🔒 Please cover the telescope and press Enter when ready...")
         input()
         
@@ -151,7 +151,7 @@ class DemoSubExposureCalculator:
         dark_library_times = [10, 15, 20, 30, 45, 60, 90, 120, 180, 240, 300, 420, 600, 900, 1200, 1800]
         
         for exposure_time in dark_library_times:
-            print(f"📸 Creating dark for {exposure_time}s exposure...")
+            print(f"[CAM] Creating dark for {exposure_time}s exposure...")
             print(f"  Capturing {self.frames_per_dark} dark frames...")
             for i in range(self.frames_per_dark):
                 print(f"    Dark frame {i+1}/{self.frames_per_dark}...")
@@ -163,35 +163,35 @@ class DemoSubExposureCalculator:
             # Create a dummy dark file
             dark_path = self.calibration_path / f"master_dark_library_{exposure_time}s.fits"
             dark_path.touch()
-            print(f"✅ Master dark saved to {dark_path}")
+            print(f"{SYMBOLS.SUCCESS} Master dark saved to {dark_path}")
         
-        print("\n🔓 Please uncover the telescope and press Enter when ready...")
+        print("\n[UNLOCK] Please uncover the telescope and press Enter when ready...")
         input()
-        print("✅ Dark frame library complete - ready for intelligent scout experiment")
+        print("{SYMBOLS.SUCCESS} Dark frame library complete - ready for intelligent scout experiment")
     
     def simulate_slew_to_zenith(self):
         """Simulate slewing to zenith."""
-        print("🔭 Slew to zenith...")
+        print("[MOUNT] Slew to zenith...")
         time.sleep(2)
         print("⏳ Waiting for slew to complete...")
         time.sleep(3)
-        print("✅ Slew to zenith completed")
+        print("{SYMBOLS.SUCCESS} Slew to zenith completed")
     
     def simulate_start_guiding(self):
         """Simulate starting the guiding process."""
-        print("🎯 Using built-in guiding (no external software detected)")
-        print("🎯 Starting built-in guiding process...")
-        print("  📸 Taking guide exposure to find guide stars...")
+        print("[TARGET] Using built-in guiding (no external software detected)")
+        print("[TARGET] Starting built-in guiding process...")
+        print("  [CAM] Taking guide exposure to find guide stars...")
         time.sleep(1)
-        print("  🔍 Finding guide stars...")
+        print("  [FOCUS] Finding guide stars...")
         time.sleep(1)
-        print("  ⭐ Selected guide star at position: (256.5, 128.3)")
-        print("  🎯 Starting guiding thread...")
+        print("  {SYMBOLS.STAR} Selected guide star at position: (256.5, 128.3)")
+        print("  [TARGET] Starting guiding thread...")
         time.sleep(1)
         print("  ⏳ Waiting for guiding to stabilize...")
         time.sleep(2)
-        print("✅ Built-in guiding started successfully")
-        print("✅ Using built-in guiding system")
+        print("{SYMBOLS.SUCCESS} Built-in guiding started successfully")
+        print("{SYMBOLS.SUCCESS} Using built-in guiding system")
     
     def simulate_focusing(self, filter_name: str) -> bool:
         """
@@ -203,11 +203,11 @@ class DemoSubExposureCalculator:
         Returns:
             True if focusing was successful (always True in demo)
         """
-        print(f"    🔍 Performing filter-aware focusing for {filter_name}...")
+        print(f"    [FOCUS] Performing filter-aware focusing for {filter_name}...")
         
         # Simulate current temperature
         current_temp = 20.0 + random.uniform(-2.0, 2.0)  # Simulate temperature around 20°C
-        print(f"    🌡️  Current temperature: {current_temp:.1f}°C")
+        print(f"    [TEMP]  Current temperature: {current_temp:.1f}°C")
         
         # Check if we have a cached position for this filter
         if filter_name in self.focus_positions:
@@ -218,25 +218,25 @@ class DemoSubExposureCalculator:
             # Check if temperature has drifted significantly
             temp_diff = abs(current_temp - cached_temp)
             if temp_diff < self.focus_temp_threshold:
-                print(f"    ✅ Temperature stable ({temp_diff:.1f}°C < {self.focus_temp_threshold}°C)")
-                print(f"    🔍 Moving to cached position: {cached_position}")
+                print(f"    {SYMBOLS.SUCCESS} Temperature stable ({temp_diff:.1f}°C < {self.focus_temp_threshold}°C)")
+                print(f"    [FOCUS] Moving to cached position: {cached_position}")
                 time.sleep(1)  # Simulate focuser movement
-                print(f"    ✅ Simple re-focus completed for {filter_name}")
+                print(f"    {SYMBOLS.SUCCESS} Simple re-focus completed for {filter_name}")
                 return True
             else:
-                print(f"    🌡️  Temperature drift detected: {temp_diff:.1f}°C > {self.focus_temp_threshold}°C")
-                print(f"    🔄 Full refocus needed due to temperature change")
+                print(f"    [TEMP]  Temperature drift detected: {temp_diff:.1f}°C > {self.focus_temp_threshold}°C")
+                print(f"    {SYMBOLS.REFRESH} Full refocus needed due to temperature change")
         else:
-            print(f"    🆕 First time using {filter_name} filter")
-            print(f"    🔄 Full refocus needed for new filter")
+            print(f"    [NEW] First time using {filter_name} filter")
+            print(f"    {SYMBOLS.REFRESH} Full refocus needed for new filter")
         
         # Simulate full autofocus routine
-        print(f"    🔄 Starting full autofocus routine...")
-        print(f"    🔍 Using internal HFD autofocus...")
+        print(f"    {SYMBOLS.REFRESH} Starting full autofocus routine...")
+        print(f"    [FOCUS] Using internal HFD autofocus...")
         
         # Simulate focuser movement and HFD measurement
         base_position = 5000 + random.uniform(-500, 500)
-        print(f"    📍 Starting position: {int(base_position)}")
+        print(f"    [LOC] Starting position: {int(base_position)}")
         
         # Simulate testing multiple positions
         test_positions = [int(base_position - 200), int(base_position - 100), 
@@ -247,15 +247,15 @@ class DemoSubExposureCalculator:
             
             # Simulate HFD measurement
             hfd = 3.0 + random.uniform(-0.5, 0.5) + abs(position - base_position) * 0.01
-            print(f"      📊 Position {position}: HFD = {hfd:.2f}")
+            print(f"      [CHART] Position {position}: HFD = {hfd:.2f}")
         
         # Find best position (closest to base_position)
         best_position = int(base_position)
         best_hfd = 3.0
-        print(f"    ⭐ Best focus: position {best_position} with HFD {best_hfd:.2f}")
+        print(f"    {SYMBOLS.STAR} Best focus: position {best_position} with HFD {best_hfd:.2f}")
         
         # Simulate moving to best position
-        print(f"    🔍 Moving to best focus position...")
+        print(f"    [FOCUS] Moving to best focus position...")
         time.sleep(1)  # Simulate focuser movement
         
         # Update cache
@@ -264,7 +264,7 @@ class DemoSubExposureCalculator:
             'temperature': current_temp
         }
         
-        print(f"    ✅ HFD autofocus completed successfully")
+        print(f"    {SYMBOLS.SUCCESS} HFD autofocus completed successfully")
         return True
     
     def simulate_camera_properties(self, filter_name: str) -> Dict:
@@ -283,7 +283,7 @@ class DemoSubExposureCalculator:
             'read_noise': base_rn + rn_variation
         }
         
-        print(f"📊 Camera properties for {filter_name}: Gain={properties['gain']:.2f}, RN={properties['read_noise']:.2f} (simulated)")
+        print(f"[CHART] Camera properties for {filter_name}: Gain={properties['gain']:.2f}, RN={properties['read_noise']:.2f} (simulated)")
         return properties
     
     def simulate_light_frame_capture(self, exposure_time: int) -> Tuple[float, Optional[float], Optional[float]]:
@@ -358,8 +358,8 @@ class DemoSubExposureCalculator:
             self.frames_per_light = 10
             seeing_condition = "Poor"
         
-        print(f"    🌟 Seeing: {seeing_condition} (FWHM: {fwhm:.2f} pixels)")
-        print(f"    📊 Adjusted frames_per_light: {original_frames} → {self.frames_per_light}")
+        print(f"    [STAR] Seeing: {seeing_condition} (FWHM: {fwhm:.2f} pixels)")
+        print(f"    [CHART] Adjusted frames_per_light: {original_frames} → {self.frames_per_light}")
     
     def generate_dynamic_test_range(self, predicted_time: float) -> List[int]:
         """
@@ -409,7 +409,7 @@ class DemoSubExposureCalculator:
         Returns:
             Tuple of (predicted_optimal_time, dynamic_exposure_times, fwhm)
         """
-        print(f"  🎯 Phase A: Intelligent Scout & Prediction for {filter_name}")
+        print(f"  [TARGET] Phase A: Intelligent Scout & Prediction for {filter_name}")
         
         # Get camera properties for this filter
         camera_props = self.simulate_camera_properties(filter_name)
@@ -418,30 +418,30 @@ class DemoSubExposureCalculator:
         
         # Calculate target ADU
         target_adu = self.calculate_target_adu(gain, read_noise)
-        print(f"    📊 Target ADU: {target_adu:.2f}")
-        print(f"    📊 Camera Gain: {gain:.2f}, Read Noise: {read_noise:.2f}")
+        print(f"    [CHART] Target ADU: {target_adu:.2f}")
+        print(f"    [CHART] Camera Gain: {gain:.2f}, Read Noise: {read_noise:.2f}")
         
         # Simulate capturing a scout frame
-        print(f"    📸 Taking scout exposure ({self.scout_exposure_time}s)...")
+        print(f"    [CAM] Taking scout exposure ({self.scout_exposure_time}s)...")
         time.sleep(0.5)  # Simulate exposure time
         
         # Simulate analyzing the frame to get scout_adu and fwhm
         scout_adu = self.simulate_light_frame_capture(self.scout_exposure_time)[0]
         fwhm = random.uniform(1.5, 5.0)  # Random FWHM between 1.5 and 5.0 pixels
         
-        print(f"    📊 Scout frame sky ADU: {scout_adu:.2f}")
-        print(f"    📊 Measured FWHM: {fwhm:.2f} pixels")
+        print(f"    [CHART] Scout frame sky ADU: {scout_adu:.2f}")
+        print(f"    [CHART] Measured FWHM: {fwhm:.2f} pixels")
         
         # Adjust frames_per_light based on seeing conditions
         self.adjust_frames_per_light_based_on_seeing(fwhm)
         
         # Calculate sky flux rate
         sky_flux_rate = scout_adu / self.scout_exposure_time
-        print(f"    📊 Sky flux rate: {sky_flux_rate:.2f} ADU/sec")
+        print(f"    [CHART] Sky flux rate: {sky_flux_rate:.2f} ADU/sec")
         
         # Predict optimal time
         predicted_optimal_time = target_adu / sky_flux_rate
-        print(f"    🎯 Predicted optimal time: {predicted_optimal_time:.1f}s")
+        print(f"    [TARGET] Predicted optimal time: {predicted_optimal_time:.1f}s")
         
         # Generate dynamic test range
         dynamic_times = self.generate_dynamic_test_range(predicted_optimal_time)
@@ -479,8 +479,8 @@ class DemoSubExposureCalculator:
         Returns:
             List of refinement results with detailed quality analysis
         """
-        print(f"  🔎 Refining exposure for {filter_name} filter...")
-        print(f"    🎯 Initial optimal time: {scout_time:.1f}s")
+        print(f"  [REFINE] Refining exposure for {filter_name} filter...")
+        print(f"    [TARGET] Initial optimal time: {scout_time:.1f}s")
         
         # Define search range centered around scout_time
         min_exposure = max(10, scout_time - (self.refinement_steps * self.refinement_step_size))
@@ -576,28 +576,28 @@ class DemoSubExposureCalculator:
     
     def run_demo_experiment(self):
         """Run the demo experiment."""
-        print("\n🚀 Phase 2: Automated Experiment")
+        print("\n[ROCKET] Phase 2: Automated Experiment")
         print("=" * 50)
         
         # Simulate slewing to zenith
         self.simulate_slew_to_zenith()
         
         # Simulate starting guiding
-        print("\n🎯 Starting guiding system...")
+        print("\n[TARGET] Starting guiding system...")
         self.simulate_start_guiding()
         
         # Main experiment loop
         for filter_name in self.filter_names:
-            print(f"\n🎨 Switching to {filter_name} filter...")
+            print(f"\n[SWITCH] Switching to {filter_name} filter...")
             time.sleep(1)  # Simulate filter change
             
             # Perform filter-aware focusing
-            print("    🔍 Performing filter-aware focusing...")
+            print("    [FOCUS] Performing filter-aware focusing...")
             focusing_success = self.simulate_focusing(filter_name)
             if not focusing_success:
-                print("    ⚠️  Warning: Focusing failed, continuing with current focus position")
+                print("    {SYMBOLS.WARNING}  Warning: Focusing failed, continuing with current focus position")
             else:
-                print("    ✅ Focusing completed successfully")
+                print("    {SYMBOLS.SUCCESS} Focusing completed successfully")
             
             # Get camera properties for this filter
             self.camera_properties = self.simulate_camera_properties(filter_name)
@@ -608,7 +608,7 @@ class DemoSubExposureCalculator:
             # Test each exposure time in the dynamic range
             exposure_results = []
             for exposure_time in dynamic_times:
-                print(f"  📸 Capturing {self.frames_per_light} frames at {exposure_time}s...")
+                print(f"  [CAM] Capturing {self.frames_per_light} frames at {exposure_time}s...")
                 
                 # Capture multiple frames and analyze
                 sky_adus = []
@@ -664,7 +664,7 @@ class DemoSubExposureCalculator:
                 
                 # Check if refinement phase is enabled
                 if self.refine_exposure:
-                    print(f"  🔎 Starting refinement phase for {filter_name}...")
+                    print(f"  [REFINE] Starting refinement phase for {filter_name}...")
                     refinement_results = self.run_refinement_phase(filter_name, optimal_exposure)
                     refined_time = self.find_refined_optimal_exposure(refinement_results)
                     
@@ -681,8 +681,8 @@ class DemoSubExposureCalculator:
                         'scout_fwhm': scout_fwhm
                     }
                     
-                    print(f"  ✅ Refined optimal exposure for {filter_name}: {refined_time:.1f}s (refined)")
-                    print(f"  📊 Scout time: {optimal_exposure:.1f}s, Refined time: {refined_time:.1f}s")
+                    print(f"  {SYMBOLS.SUCCESS} Refined optimal exposure for {filter_name}: {refined_time:.1f}s (refined)")
+                    print(f"  [CHART] Scout time: {optimal_exposure:.1f}s, Refined time: {refined_time:.1f}s")
                 else:
                     self.results[filter_name] = {
                         'optimal_exposure': optimal_exposure,
@@ -694,17 +694,17 @@ class DemoSubExposureCalculator:
                         'scout_fwhm': scout_fwhm
                     }
                     
-                    print(f"  ✅ Optimal exposure for {filter_name}: {optimal_exposure:.1f}s")
+                    print(f"  {SYMBOLS.SUCCESS} Optimal exposure for {filter_name}: {optimal_exposure:.1f}s")
     
     def print_results(self):
         """Print the final results in a formatted table."""
-        print("\n📊 Phase 3: Results")
+        print("\n[CHART] Phase 3: Results")
         print("=" * 50)
-        print("📊 SUB-EXPOSURE CALCULATOR RESULTS")
+        print("[CHART] SUB-EXPOSURE CALCULATOR RESULTS")
         print("=" * 80)
         
         if not self.results:
-            print("❌ No results to display")
+            print("[ERROR] No results to display")
             return
         
         # Print header
@@ -737,9 +737,9 @@ class DemoSubExposureCalculator:
             # Check for warnings
             warning = ""
             if optimal_exp > 600:  # 10 minutes
-                warning = " ⚠️  LONG EXPOSURE"
+                warning = " {SYMBOLS.WARNING}  LONG EXPOSURE"
             elif optimal_exp > 300:  # 5 minutes
-                warning = " ⚠️  MODERATE EXPOSURE"
+                warning = " {SYMBOLS.WARNING}  MODERATE EXPOSURE"
             
             print(f"{filter_name:<15} {optimal_exp:<15.1f}{refinement_marker:<15} {gain:<8.2f} {read_noise:<12.2f} {target_adu:<12.1f} {scout_fwhm_str:<12} {median_fwhm:<12} {median_ecc:<10}{warning}")
         
@@ -754,10 +754,10 @@ class DemoSubExposureCalculator:
         
         # Show focusing information if available
         if self.focus_positions:
-            print("\n🔍 FOCUSING INFORMATION (Demo):")
+            print("\n[FOCUS] FOCUSING INFORMATION (Demo):")
             print("-" * 60)
             for filter_name, focus_data in self.focus_positions.items():
-                print(f"  🎨 {filter_name}: Position {focus_data['position']} at {focus_data['temperature']:.1f}°C")
+                print(f"  [SWITCH] {filter_name}: Position {focus_data['position']} at {focus_data['temperature']:.1f}°C")
             print("  • Focus positions are cached for efficient filter changes")
             print("  • Temperature drift triggers automatic refocusing")
             print("  • Demo simulates realistic focusing behavior")
@@ -765,27 +765,27 @@ class DemoSubExposureCalculator:
         # Show refinement information if applicable
         refined_filters = [name for name, result in self.results.items() if result.get('is_refined', False)]
         if refined_filters:
-            print(f"\n🔎 REFINEMENT PHASE SUMMARY:")
+            print(f"\n[REFINE] REFINEMENT PHASE SUMMARY:")
             print(f"  • Filters with refinement: {', '.join(refined_filters)}")
             print(f"  • Refinement steps: {self.refinement_steps} on each side")
             print(f"  • Refinement step size: {self.refinement_step_size}s")
             print(f"  • High-precision bracketing search completed for optimal image quality")
         
         if any(r['optimal_exposure'] > 600 for r in self.results.values()):
-            print("\n⚠️  WARNING: Some exposures are very long (>10 minutes)")
+            print("\n{SYMBOLS.WARNING}  WARNING: Some exposures are very long (>10 minutes)")
             print("  Consider using a higher gain setting or accepting lower SNR")
     
     def run(self):
         """Main execution method."""
         try:
-            print("🌟 Sub-Exposure Calculator v6.1 - DEMO MODE")
+            print("[STAR] Sub-Exposure Calculator v6.1 - DEMO MODE")
             print("=" * 60)
-            print("⚠️  This is a DEMO version with simulated data")
+            print("{SYMBOLS.WARNING}  This is a DEMO version with simulated data")
             print("   Use the real script for actual measurements")
-            print("🔍 ADVANCED FOCUSING ENABLED - Filter-aware focusing system")
-            print("🌟 DYNAMIC SEEING ADJUSTMENT ENABLED - Automatic frames_per_light adjustment")
+            print("[FOCUS] ADVANCED FOCUSING ENABLED - Filter-aware focusing system")
+            print("[STAR] DYNAMIC SEEING ADJUSTMENT ENABLED - Automatic frames_per_light adjustment")
             if self.refine_exposure:
-                print("🔎 REFINEMENT PHASE ENABLED - High-precision bracketing search")
+                print("[REFINE] REFINEMENT PHASE ENABLED - High-precision bracketing search")
             print("=" * 60)
             
             # Phase 0: Setup and device discovery
@@ -801,9 +801,9 @@ class DemoSubExposureCalculator:
             self.print_results()
             
         except KeyboardInterrupt:
-            print("\n⚠️  Demo interrupted by user")
+            print("\n{SYMBOLS.WARNING}  Demo interrupted by user")
         except Exception as e:
-            print(f"\n❌ Error during demo execution: {e}")
+            print(f"\n[ERROR] Error during demo execution: {e}")
             import traceback
             traceback.print_exc()
 

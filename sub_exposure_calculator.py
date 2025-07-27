@@ -29,12 +29,49 @@ import pytz
 import pyindi_client as indi
 from pyindi_client import INDIError
 
+# Universal symbol system for cross-platform compatibility
+class Symbols:
+    """Universal symbol system that works across all terminals and operating systems."""
+    
+    # Success/Completion symbols
+    SUCCESS = "[OK]"      # Instead of {SYMBOLS.SUCCESS}
+    CHECK = "[OK]"        # Alternative for {SYMBOLS.SUCCESS}
+    
+    # Star/Best symbols
+    STAR = "[*]"          # Instead of {SYMBOLS.STAR}
+    BEST = "[BEST]"       # Alternative for {SYMBOLS.STAR}
+    
+    # Action/Process symbols
+    FOCUS = "[FOCUS]"     # Instead of [FOCUS]
+    SWITCH = "[SWITCH]"   # Instead of [SWITCH]
+    CAMERA = "[CAM]"      # Instead of [CAM]
+    WARNING = "[WARN]"    # Instead of {SYMBOLS.WARNING}
+    TARGET = "[TARGET]"   # Instead of [TARGET]
+    REFRESH = "[REFRESH]" # Instead of {SYMBOLS.REFRESH}
+    INFO = "[INFO]"       # Instead of [INFO]
+    ERROR = "[ERROR]"     # Instead of [ERROR]
+    LOCATION = "[LOC]"    # Instead of [LOC]
+    SUNRISE = "[SUNRISE]" # Instead of [SUNRISE]
+    UNIVERSE = "[UNIV]"   # Instead of [UNIV]
+    TELESCOPE = "[TEL]"   # Instead of [MOUNT]
+    CONNECT = "[CONN]"    # Instead of [CONN]
+    DISCONNECT = "[DISC]" # Instead of [CONN]
+    STAR_EMOJI = "[STAR]" # Instead of [STAR]
+    UNLOCK = "[UNLOCK]"   # Instead of [UNLOCK]
+    ROCKET = "[ROCKET]"   # Instead of [ROCKET]
+    STOP = "[STOP]"       # Instead of [STOP]
+    DISCOVER = "[DISC]"   # Instead of [FOCUS]
+    CHART = "[CHART]"     # Instead of [CHART]
+
+# Global symbol instance
+SYMBOLS = Symbols()
+
 # Configuration loading
 try:
     import yaml
     YAML_AVAILABLE = True
 except ImportError:
-    print("⚠️  Warning: PyYAML not available. Using default configuration.")
+    print(f"{SYMBOLS.WARNING} Warning: PyYAML not available. Using default configuration.")
     YAML_AVAILABLE = False
 
 # Image quality analysis imports
@@ -44,7 +81,7 @@ try:
     from scipy import ndimage
     PHOTUTILS_AVAILABLE = True
 except ImportError:
-    print("⚠️  Warning: photutils not available. Using fallback star detection method.")
+    print(f"{SYMBOLS.WARNING} Warning: photutils not available. Using fallback star detection method.")
     PHOTUTILS_AVAILABLE = False
 
 # Astronomical database query imports
@@ -52,7 +89,7 @@ try:
     from astroquery.gaia import Gaia
     ASTROQUERY_AVAILABLE = True
 except ImportError:
-    print("⚠️  Warning: astroquery not available. Optimal target finding will be disabled.")
+    print(f"{SYMBOLS.WARNING} Warning: astroquery not available. Optimal target finding will be disabled.")
     ASTROQUERY_AVAILABLE = False
 
 
@@ -157,14 +194,14 @@ class SubExposureCalculator:
                     lon=longitude * u.deg,
                     height=elevation * u.m
                 )
-                print(f"✅ Loaded telescope location: {latitude:.4f}°N, {longitude:.4f}°E, {elevation}m")
+                print(f"{SYMBOLS.SUCCESS} Loaded telescope location: {latitude:.4f}°N, {longitude:.4f}°E, {elevation}m")
             else:
-                print("⚠️  Warning: Telescope location not found in configuration")
+                print(f"{SYMBOLS.WARNING} Warning: Telescope location not found in configuration")
                 print("   Optimal target finding will be disabled")
                 self.location = None
                 
         except Exception as e:
-            print(f"⚠️  Error loading telescope location: {e}")
+            print(f"{SYMBOLS.ERROR} Error loading telescope location: {e}")
             self.location = None
     
     def load_zenith_tracking_config(self):
@@ -184,14 +221,14 @@ class SubExposureCalculator:
             self.meridian_flip_avoidance_weight = target_config.get('meridian_flip_avoidance_weight', 0.2)
             
             if self.zenith_tracking_enabled:
-                print(f"✅ Zenith tracking enabled: {self.zenith_tracking_interval}min interval, {self.zenith_tracking_threshold}° threshold")
+                print(f"{SYMBOLS.SUCCESS} Zenith tracking enabled: {self.zenith_tracking_interval}min interval, {self.zenith_tracking_threshold}° threshold")
             else:
-                print("⚠️  Zenith tracking disabled")
+                print(f"{SYMBOLS.WARNING} Zenith tracking disabled")
             
-            print(f"🎯 Target selection: {self.eastern_preference_weight:.1%} eastern preference, {self.separation_quality_weight:.1%} separation quality, {self.meridian_flip_avoidance_weight:.1%} meridian flip avoidance")
+            print(f"{SYMBOLS.TARGET} Target selection: {self.eastern_preference_weight:.1%} eastern preference, {self.separation_quality_weight:.1%} separation quality, {self.meridian_flip_avoidance_weight:.1%} meridian flip avoidance")
                 
         except Exception as e:
-            print(f"⚠️  Error loading zenith tracking config: {e}")
+            print(f"{SYMBOLS.ERROR} Error loading zenith tracking config: {e}")
             # Keep default values
     
     def load_configuration(self) -> Dict:
@@ -207,13 +244,13 @@ class SubExposureCalculator:
                 try:
                     with open(config_path, 'r') as f:
                         config = yaml.safe_load(f)
-                    print(f"✅ Loaded configuration from {config_path}")
+                    print(f"{SYMBOLS.SUCCESS} Loaded configuration from {config_path}")
                     return config
                 except Exception as e:
-                    print(f"⚠️  Error loading {config_path}: {e}")
+                    print(f"{SYMBOLS.ERROR} Error loading {config_path}: {e}")
         
         # Return default configuration if no file found
-        print("⚠️  No configuration file found, using defaults")
+        print(f"{SYMBOLS.WARNING} No configuration file found, using defaults")
         return {
             'analysis': {
                 'sky_region_fraction': 0.8,
@@ -224,7 +261,7 @@ class SubExposureCalculator:
         
     def connect_to_indi(self):
         """Connect to INDI server and discover devices."""
-        print("🔌 Connecting to INDI server...")
+        print(f"{SYMBOLS.CONNECT} Connecting to INDI server...")
         try:
             self.client = indi.INDIBaseClient()
             self.client.setServer(self.args.host, self.args.port)
@@ -236,15 +273,15 @@ class SubExposureCalculator:
             if not self.client.isServerConnected():
                 raise INDIError("Failed to connect to INDI server")
                 
-            print("✅ Connected to INDI server successfully")
+            print(f"{SYMBOLS.SUCCESS} Connected to INDI server successfully")
             
         except Exception as e:
-            print(f"❌ Failed to connect to INDI server: {e}")
+            print(f"{SYMBOLS.ERROR} Failed to connect to INDI server: {e}")
             sys.exit(1)
     
     def discover_devices(self):
         """Auto-discover and select Camera, Mount, and Filter Wheel devices."""
-        print("🔍 Discovering INDI devices...")
+        print(f"{SYMBOLS.DISCOVER} Discovering INDI devices...")
         
         # Get all devices
         devices = self.client.getDevices()
@@ -265,7 +302,7 @@ class SubExposureCalculator:
             else:
                 raise INDIError("No camera found")
         
-        print(f"📷 Selected camera: {self.camera.getDeviceName()}")
+        print(f"{SYMBOLS.CAMERA} Selected camera: {self.camera.getDeviceName()}")
         
         # Find mount
         if self.args.mount_name:
@@ -281,11 +318,11 @@ class SubExposureCalculator:
                 choice = input("Select mount (1, 2, etc.): ")
                 self.mount = mounts[int(choice) - 1]
             else:
-                print("⚠️  No mount found - will skip slewing to zenith")
+                print(f"{SYMBOLS.WARNING} No mount found - will skip slewing to zenith")
                 self.mount = None
         
         if self.mount:
-            print(f"🔭 Selected mount: {self.mount.getDeviceName()}")
+            print(f"{SYMBOLS.SWITCH} Selected mount: {self.mount.getDeviceName()}")
         
         # Find filter wheel
         if self.args.filter_wheel_name:
@@ -301,11 +338,11 @@ class SubExposureCalculator:
                 choice = input("Select filter wheel (1, 2, etc.): ")
                 self.filter_wheel = filter_wheels[int(choice) - 1]
             else:
-                print("⚠️  No filter wheel found - will use single filter mode")
+                print(f"{SYMBOLS.WARNING} No filter wheel found - will use single filter mode")
                 self.filter_wheel = None
         
         if self.filter_wheel:
-            print(f"🎨 Selected filter wheel: {self.filter_wheel.getDeviceName()}")
+            print(f"{SYMBOLS.SWITCH} Selected filter wheel: {self.filter_wheel.getDeviceName()}")
             self.get_filter_names()
         else:
             self.filter_names = ['Luminance']  # Default filter
@@ -324,13 +361,13 @@ class SubExposureCalculator:
                 choice = input("Select guide camera (1, 2, etc.): ")
                 self.guide_camera = guide_cameras[int(choice) - 1]
             else:
-                print("⚠️  No guide camera found - will skip guiding functionality")
+                print(f"{SYMBOLS.WARNING} No guide camera found - will skip guiding functionality")
                 self.guide_camera = None
         
         if self.guide_camera:
-            print(f"🎯 Selected guide camera: {self.guide_camera.getDeviceName()}")
+            print(f"{SYMBOLS.TARGET} Selected guide camera: {self.guide_camera.getDeviceName()}")
         else:
-            print("⚠️  No guide camera available - guiding will be disabled")
+            print(f"{SYMBOLS.WARNING} No guide camera available - guiding will be disabled")
         
         # Find focuser
         if self.args.focuser_name:
@@ -346,13 +383,13 @@ class SubExposureCalculator:
                 choice = input("Select focuser (1, 2, etc.): ")
                 self.focuser = focusers[int(choice) - 1]
             else:
-                print("⚠️  No focuser found - focusing will be disabled")
+                print(f"{SYMBOLS.WARNING} No focuser found - focusing will be disabled")
                 self.focuser = None
         
         if self.focuser:
-            print(f"🔍 Selected focuser: {self.focuser.getDeviceName()}")
+            print(f"{SYMBOLS.FOCUS} Selected focuser: {self.focuser.getDeviceName()}")
         else:
-            print("⚠️  No focuser available - focusing will be disabled")
+            print(f"{SYMBOLS.WARNING} No focuser available - focusing will be disabled")
     
     def perform_focusing(self, filter_name: str) -> bool:
         """
@@ -365,15 +402,15 @@ class SubExposureCalculator:
             True if focusing was successful, False otherwise
         """
         if not self.focuser:
-            print("⚠️  No focuser available, skipping focusing")
+            print(f"{SYMBOLS.WARNING} No focuser available, skipping focusing")
             return False
         
         try:
-            print(f"🔍 Performing filter-aware focusing for {filter_name}...")
+            print(f"{SYMBOLS.FOCUS} Performing filter-aware focusing for {filter_name}...")
             
             # Get current temperature from focuser or another sensor
             current_temp = self._get_current_temperature()
-            print(f"    🌡️  Current temperature: {current_temp:.1f}°C")
+            print(f"    [TEMP] Current temperature: {current_temp:.1f}°C")
             
             # Check if we have a cached position for this filter
             if filter_name in self.focus_positions:
@@ -384,43 +421,43 @@ class SubExposureCalculator:
                 # Check if temperature has drifted significantly
                 temp_diff = abs(current_temp - cached_temp)
                 if temp_diff < self.focus_temp_threshold:
-                    print(f"    ✅ Temperature stable ({temp_diff:.1f}°C < {self.focus_temp_threshold}°C)")
-                    print(f"    🔍 Moving to cached position: {cached_position}")
+                    print(f"    {SYMBOLS.SUCCESS} Temperature stable ({temp_diff:.1f}°C < {self.focus_temp_threshold}°C)")
+                    print(f"    {SYMBOLS.FOCUS} Moving to cached position: {cached_position}")
                     
                     # Simple re-focus: move to cached position
                     success = self._move_focuser_to_position(cached_position)
                     if success:
-                        print(f"    ✅ Simple re-focus completed for {filter_name}")
+                        print(f"    {SYMBOLS.SUCCESS} Simple re-focus completed for {filter_name}")
                         return True
                     else:
-                        print(f"    ⚠️  Failed to move to cached position, will perform full refocus")
+                        print(f"    {SYMBOLS.WARNING} Failed to move to cached position, will perform full refocus")
                 else:
-                    print(f"    🌡️  Temperature drift detected: {temp_diff:.1f}°C > {self.focus_temp_threshold}°C")
-                    print(f"    🔄 Full refocus needed due to temperature change")
+                    print(f"    [TEMP] Temperature drift detected: {temp_diff:.1f}°C > {self.focus_temp_threshold}°C")
+                    print(f"    {SYMBOLS.REFRESH} Full refocus needed due to temperature change")
             else:
-                print(f"    🆕 First time using {filter_name} filter")
-                print(f"    🔄 Full refocus needed for new filter")
+                print(f"    [NEW] First time using {filter_name} filter")
+                print(f"    {SYMBOLS.REFRESH} Full refocus needed for new filter")
             
             # Full refocus is needed
-            print(f"    🔄 Starting full autofocus routine...")
+            print(f"    {SYMBOLS.REFRESH} Starting full autofocus routine...")
             
             # Check for EKOS
             if self.ekos_running:
-                print(f"    🎯 Using EKOS for focusing...")
+                print(f"    {SYMBOLS.TARGET} Using EKOS for focusing...")
                 success = self._focus_with_ekos(filter_name, current_temp)
             else:
-                print(f"    🔍 Using internal HFD autofocus...")
+                print(f"    {SYMBOLS.FOCUS} Using internal HFD autofocus...")
                 success = self._run_hfd_autofocus(filter_name, current_temp)
             
             if success:
-                print(f"    ✅ Full autofocus completed successfully for {filter_name}")
+                print(f"    {SYMBOLS.SUCCESS} Full autofocus completed successfully for {filter_name}")
                 return True
             else:
-                print(f"    ❌ Autofocus failed for {filter_name}")
+                print(f"    {SYMBOLS.ERROR} Autofocus failed for {filter_name}")
                 return False
                 
         except Exception as e:
-            print(f"❌ Error during focusing: {e}")
+            print(f"{SYMBOLS.ERROR} Error during focusing: {e}")
             return False
     
     def _get_current_temperature(self) -> float:
@@ -445,11 +482,11 @@ class SubExposureCalculator:
                     return float(temp_prop[0].getNumber())
             
             # If no temperature sensor available, use a default value
-            print("    ⚠️  No temperature sensor found, using default temperature")
+            print(f"    {SYMBOLS.WARNING} No temperature sensor found, using default temperature")
             return 20.0  # Default temperature
             
         except Exception as e:
-            print(f"    ⚠️  Error getting temperature: {e}, using default")
+            print(f"    {SYMBOLS.WARNING} Error getting temperature: {e}, using default")
             return 20.0  # Default temperature
     
     def _move_focuser_to_position(self, position: int) -> bool:
@@ -469,14 +506,14 @@ class SubExposureCalculator:
                 if abs(current_pos - position) <= 10:  # Allow 10 steps tolerance
                     return True
                 else:
-                    print(f"    ⚠️  Focuser position mismatch: expected {position}, got {current_pos}")
+                    print(f"    {SYMBOLS.WARNING} Focuser position mismatch: expected {position}, got {current_pos}")
                     return False
             else:
-                print(f"    ❌ Could not access focuser position property")
+                print(f"    {SYMBOLS.ERROR} Could not access focuser position property")
                 return False
                 
         except Exception as e:
-            print(f"    ❌ Error moving focuser: {e}")
+            print(f"    {SYMBOLS.ERROR} Error moving focuser: {e}")
             return False
     
     def _focus_with_ekos(self, filter_name: str, current_temp: float) -> bool:
@@ -491,12 +528,12 @@ class SubExposureCalculator:
             True if focusing was successful
         """
         try:
-            print(f"    🎯 Attempting to query EKOS for stored focus position...")
+            print(f"{SYMBOLS.TARGET} Attempting to query EKOS for stored focus position...")
             
             # First, try to query EKOS for its stored focus position for this filter
             ekos_position = self._query_ekos_focus_position(filter_name)
             if ekos_position is not None:
-                print(f"    ✅ EKOS has stored position for {filter_name}: {ekos_position}")
+                print(f"{SYMBOLS.SUCCESS} EKOS has stored position for {filter_name}: {ekos_position}")
                 
                 # Move to EKOS position
                 success = self._move_focuser_to_position(ekos_position)
@@ -506,11 +543,11 @@ class SubExposureCalculator:
                         'position': ekos_position,
                         'temperature': current_temp
                     }
-                    print(f"    ✅ Using EKOS stored position for {filter_name}")
+                    print(f"{SYMBOLS.SUCCESS} Using EKOS stored position for {filter_name}")
                     return True
             
             # If EKOS doesn't have a stored position, run full EKOS autofocus
-            print(f"    🔄 EKOS doesn't have stored position, running full autofocus...")
+            print(f"{SYMBOLS.REFRESH} EKOS doesn't have stored position, running full autofocus...")
             
             # Trigger EKOS autofocus
             success = self._trigger_ekos_autofocus()
@@ -523,13 +560,13 @@ class SubExposureCalculator:
                         'position': final_position,
                         'temperature': current_temp
                     }
-                    print(f"    ✅ EKOS autofocus completed, position: {final_position}")
+                    print(f"{SYMBOLS.SUCCESS} EKOS autofocus completed, position: {final_position}")
                     return True
             
             return False
             
         except Exception as e:
-            print(f"    ❌ Error in EKOS focusing: {e}")
+            print(f"{SYMBOLS.ERROR} Error in EKOS focusing: {e}")
             return False
     
     def _run_hfd_autofocus(self, filter_name: str, current_temp: float) -> bool:
@@ -544,15 +581,15 @@ class SubExposureCalculator:
             True if focusing was successful
         """
         try:
-            print(f"    🔍 Running internal HFD autofocus routine...")
+            print(f"{SYMBOLS.FOCUS} Running internal HFD autofocus routine...")
             
             # Get current focuser position
             current_position = self._get_focuser_position()
             if current_position is None:
-                print(f"    ❌ Could not get current focuser position")
+                print(f"{SYMBOLS.ERROR} Could not get current focuser position")
                 return False
             
-            print(f"    📍 Starting position: {current_position}")
+            print(f"{SYMBOLS.LOCATION} Starting position: {current_position}")
             
             # Define focus range and step size
             focus_range = 1000  # Total range to test
@@ -570,7 +607,7 @@ class SubExposureCalculator:
                 
                 # Move to position
                 if not self._move_focuser_to_position(position):
-                    print(f"      ⚠️  Failed to move to position {position}, skipping")
+                    print(f"      {SYMBOLS.WARNING} Failed to move to position {position}, skipping")
                     continue
                 
                 # Wait for focuser to settle
@@ -605,7 +642,7 @@ class SubExposureCalculator:
                 return False
                 
         except Exception as e:
-            print(f"    ❌ Error in HFD autofocus: {e}")
+            print(f"{SYMBOLS.ERROR} Error in HFD autofocus: {e}")
             return False
     
     def _query_ekos_focus_position(self, filter_name: str) -> Optional[int]:
@@ -617,7 +654,7 @@ class SubExposureCalculator:
             return None
             
         except Exception as e:
-            print(f"    ⚠️  Error querying EKOS focus position: {e}")
+            print(f"{SYMBOLS.ERROR} Error querying EKOS focus position: {e}")
             return None
     
     def _trigger_ekos_autofocus(self) -> bool:
@@ -625,13 +662,13 @@ class SubExposureCalculator:
         try:
             # This would typically involve sending commands to EKOS
             # For now, we'll simulate success
-            print(f"    🎯 Triggering EKOS autofocus...")
+            print(f"{SYMBOLS.TARGET} Triggering EKOS autofocus...")
             time.sleep(10)  # Simulate autofocus time
-            print(f"    ✅ EKOS autofocus completed")
+            print(f"{SYMBOLS.SUCCESS} EKOS autofocus completed")
             return True
             
         except Exception as e:
-            print(f"    ❌ Error triggering EKOS autofocus: {e}")
+            print(f"{SYMBOLS.ERROR} Error triggering EKOS autofocus: {e}")
             return False
     
     def _get_focuser_position(self) -> Optional[int]:
@@ -644,7 +681,7 @@ class SubExposureCalculator:
                 return None
                 
         except Exception as e:
-            print(f"    ⚠️  Error getting focuser position: {e}")
+            print(f"{SYMBOLS.ERROR} Error getting focuser position: {e}")
             return None
     
     def _measure_hfd(self, image_data: np.ndarray) -> Optional[float]:
@@ -711,7 +748,7 @@ class SubExposureCalculator:
                     return None
                     
         except Exception as e:
-            print(f"    ⚠️  Error measuring HFD: {e}")
+            print(f"{SYMBOLS.ERROR} Error measuring HFD: {e}")
             return None
     
     def _calculate_hfd_at_position(self, image_data: np.ndarray, x: int, y: int, background: float) -> Optional[float]:
@@ -776,28 +813,28 @@ class SubExposureCalculator:
     
     def detect_external_guiding(self):
         """Detect if PHD2 or EKOS are running and can provide guiding."""
-        print("🔍 Checking for external guiding software...")
+        print(f"{SYMBOLS.DISCOVER} Checking for external guiding software...")
         
         # Check for PHD2
         self.phd2_running = self._check_phd2_running()
         if self.phd2_running:
-            print("✅ PHD2 detected and running")
+            print(f"{SYMBOLS.SUCCESS} PHD2 detected and running")
         
         # Check for EKOS
         self.ekos_running = self._check_ekos_running()
         if self.ekos_running:
-            print("✅ EKOS detected and running")
+            print(f"{SYMBOLS.SUCCESS} EKOS detected and running")
         
         # Check if external guiding is active
         if self.phd2_running or self.ekos_running:
             self.external_guiding_active = self._check_external_guiding_status()
             if self.external_guiding_active:
-                print("🎯 External guiding is active and ready")
+                print(f"{SYMBOLS.TARGET} External guiding is active and ready")
             else:
-                print("⚠️  External guiding software found but not actively guiding")
+                print(f"{SYMBOLS.WARNING} External guiding software found but not actively guiding")
         
         if not self.phd2_running and not self.ekos_running:
-            print("ℹ️  No external guiding software detected")
+            print(f"{SYMBOLS.INFO} No external guiding software detected")
     
     def _check_phd2_running(self) -> bool:
         """Check if PHD2 is running by looking for its process and network port."""
@@ -834,7 +871,7 @@ class SubExposureCalculator:
                 pass
                 
         except Exception as e:
-            print(f"⚠️  Error checking PHD2: {e}")
+            print(f"{SYMBOLS.ERROR} Error checking PHD2: {e}")
         
         return False
     
@@ -861,7 +898,7 @@ class SubExposureCalculator:
                     return True
                     
         except Exception as e:
-            print(f"⚠️  Error checking EKOS: {e}")
+            print(f"{SYMBOLS.ERROR} Error checking EKOS: {e}")
         
         return False
     
@@ -896,7 +933,7 @@ class SubExposureCalculator:
                     pass
                     
         except Exception as e:
-            print(f"⚠️  Error checking external guiding status: {e}")
+            print(f"{SYMBOLS.ERROR} Error checking external guiding status: {e}")
         
         return False
     
@@ -906,12 +943,12 @@ class SubExposureCalculator:
             filter_prop = self.filter_wheel.getProperty('FILTER_NAME')
             if filter_prop:
                 self.filter_names = [filter_prop[i].getText() for i in range(filter_prop.getCount())]
-                print(f"🎨 Available filters: {', '.join(self.filter_names)}")
+                print(f"{SYMBOLS.SWITCH} Available filters: {', '.join(self.filter_names)}")
             else:
                 self.filter_names = ['Luminance']
-                print("⚠️  Could not get filter names, using default")
+                print(f"{SYMBOLS.WARNING} Could not get filter names, using default")
         except Exception as e:
-            print(f"⚠️  Error getting filter names: {e}")
+            print(f"{SYMBOLS.ERROR} Error getting filter names: {e}")
             self.filter_names = ['Luminance']
     
     def get_camera_properties(self, filter_name: str) -> Dict:
@@ -930,26 +967,26 @@ class SubExposureCalculator:
                 
                 # Check if we got both properties from INDI
                 if 'gain' in properties and 'read_noise' in properties:
-                    print(f"📊 Camera properties for {filter_name}: Gain={properties['gain']:.2f}, RN={properties['read_noise']:.2f} (from INDI)")
+                    print(f"{SYMBOLS.CAMERA} Camera properties for {filter_name}: Gain={properties['gain']:.2f}, RN={properties['read_noise']:.2f} (from INDI)")
                     return properties
                 else:
-                    print(f"⚠️  INDI provided incomplete camera properties for {filter_name}")
+                    print(f"{SYMBOLS.WARNING} INDI provided incomplete camera properties for {filter_name}")
                     print(f"   Available: {list(properties.keys())}")
         except Exception as e:
-            print(f"⚠️  Error getting camera properties from INDI: {e}")
+            print(f"{SYMBOLS.ERROR} Error getting camera properties from INDI: {e}")
         
         # Fallback to config file defaults
         camera_config = self.config.get('camera', {})
         default_gain = camera_config.get('default_gain', 1.0)
         default_read_noise = camera_config.get('default_read_noise', 5.0)
         
-        print(f"📊 Camera properties for {filter_name}: Gain={default_gain:.2f}, RN={default_read_noise:.2f} (from config)")
+        print(f"{SYMBOLS.CAMERA} Camera properties for {filter_name}: Gain={default_gain:.2f}, RN={default_read_noise:.2f} (from config)")
         return {'gain': default_gain, 'read_noise': default_read_noise}
     
     def _get_zenith_coordinates(self) -> Optional[SkyCoord]:
         """Calculate current zenith coordinates in ICRS (RA/Dec)."""
         if not self.location:
-            print("⚠️  No telescope location available for zenith calculation")
+            print(f"{SYMBOLS.WARNING} No telescope location available for zenith calculation")
             return None
         
         try:
@@ -961,21 +998,21 @@ class SubExposureCalculator:
             # Convert to RA/Dec
             ra_dec = zenith.transform_to('icrs')
             
-            print(f"📍 Current zenith: RA {ra_dec.ra.hour:.4f}h, Dec {ra_dec.dec.deg:.4f}°")
+            print(f"{SYMBOLS.TARGET} Current zenith: RA {ra_dec.ra.hour:.4f}h, Dec {ra_dec.dec.deg:.4f}°")
             return ra_dec
             
         except Exception as e:
-            print(f"⚠️  Error calculating zenith coordinates: {e}")
+            print(f"{SYMBOLS.ERROR} Error calculating zenith coordinates: {e}")
             return None
     
     def _slew_to_coordinates(self, coords: SkyCoord) -> bool:
         """Slew the mount to specified coordinates."""
         if not self.mount:
-            print("⚠️  No mount available, skipping slew")
+            print(f"{SYMBOLS.WARNING} No mount available, skipping slew")
             return False
         
         try:
-            print(f"🔭 Slew to coordinates: RA {coords.ra.hour:.4f}h, Dec {coords.dec.deg:.4f}°")
+            print(f"{SYMBOLS.SWITCH} Slew to coordinates: RA {coords.ra.hour:.4f}h, Dec {coords.dec.deg:.4f}°")
             
             # Get slewing wait time from config
             slewing_wait_time = self.config.get('mount', {}).get('slewing', {}).get('wait_time', 15)
@@ -991,14 +1028,14 @@ class SubExposureCalculator:
                 print(f"⏳ Waiting {slewing_wait_time}s for slew to complete...")
                 time.sleep(slewing_wait_time)
                 
-                print("✅ Slew completed")
+                print(f"{SYMBOLS.SUCCESS} Slew completed")
                 return True
             else:
-                print("⚠️  Could not slew - mount property not available")
+                print(f"{SYMBOLS.WARNING} Could not slew - mount property not available")
                 return False
                 
         except Exception as e:
-            print(f"⚠️  Error slewing to coordinates: {e}")
+            print(f"{SYMBOLS.ERROR} Error slewing to coordinates: {e}")
             return False
     
     def slew_to_zenith(self):
@@ -1007,17 +1044,17 @@ class SubExposureCalculator:
         if zenith_coords:
             return self._slew_to_coordinates(zenith_coords)
         else:
-            print("⚠️  Could not calculate zenith coordinates")
+            print(f"{SYMBOLS.WARNING} Could not calculate zenith coordinates")
             return False
     
     def _query_bright_stars_near_zenith(self, zenith_coords: SkyCoord, search_radius: float = 5.0) -> List[SkyCoord]:
         """Query Gaia database for bright stars near zenith coordinates."""
         if not ASTROQUERY_AVAILABLE:
-            print("⚠️  astroquery not available, cannot query bright stars")
+            print(f"{SYMBOLS.WARNING} astroquery not available, cannot query bright stars")
             return []
         
         try:
-            print(f"🔍 Querying Gaia database for bright stars within {search_radius}° of zenith...")
+            print(f"{SYMBOLS.DISCOVER} Querying Gaia database for bright stars within {search_radius}° of zenith...")
             
             # Query Gaia for stars brighter than G=9.0 within search radius
             query = f"""
@@ -1036,27 +1073,27 @@ class SubExposureCalculator:
                     star_coord = SkyCoord(ra=row['ra']*u.deg, dec=row['dec']*u.deg, frame='icrs')
                     bright_stars.append(star_coord)
                 
-                print(f"✅ Found {len(bright_stars)} bright stars near zenith")
+                print(f"{SYMBOLS.SUCCESS} Found {len(bright_stars)} bright stars near zenith")
                 return bright_stars
             else:
-                print("✅ No bright stars found near zenith")
+                print(f"{SYMBOLS.SUCCESS} No bright stars found near zenith")
                 return []
                 
         except Exception as e:
-            print(f"⚠️  Error querying Gaia database: {e}")
+            print(f"{SYMBOLS.ERROR} Error querying Gaia database: {e}")
             return []
     
     def _find_optimal_dark_patch(self, zenith_coords: SkyCoord, bright_stars: List[SkyCoord], 
                                 grid_size: int = 10, grid_radius: float = 5.0) -> SkyCoord:
         """Find the darkest patch in a grid around zenith coordinates, prioritizing eastern targets and avoiding meridian flips."""
         if not bright_stars:
-            print("✅ No bright stars found - zenith is optimal target")
+            print(f"{SYMBOLS.SUCCESS} No bright stars found - zenith is optimal target")
             return zenith_coords
         
         try:
-            print(f"🔍 Searching for optimal dark patch in {grid_size}x{grid_size} grid...")
-            print("🌅 Prioritizing eastern targets for maximum imaging time...")
-            print("🔄 Avoiding meridian flips for uninterrupted imaging...")
+            print(f"{SYMBOLS.DISCOVER} Searching for optimal dark patch in {grid_size}x{grid_size} grid...")
+            print("[SUNRISE] Prioritizing eastern targets for maximum imaging time...")
+            print("{SYMBOLS.REFRESH} Avoiding meridian flips for uninterrupted imaging...")
             
             # Estimate experiment duration for meridian flip risk calculation
             estimated_duration = self._estimate_experiment_duration(
@@ -1110,50 +1147,50 @@ class SubExposureCalculator:
             ra_difference = (best_coord.ra - zenith_coords.ra).wrap_at(180 * u.deg)
             if ra_difference > 0:
                 direction = "east"
-                print(f"✅ Found optimal dark patch {max_min_separation:.2f}° from nearest bright star")
-                print(f"📍 Optimal coordinates: RA {best_coord.ra.hour:.4f}h, Dec {best_coord.dec.deg:.4f}° ({direction} of zenith)")
-                print(f"🌅 Eastern preference applied - target will stay above horizon longer")
+                print(f"{SYMBOLS.SUCCESS} Found optimal dark patch {max_min_separation:.2f}° from nearest bright star")
+                print(f"{SYMBOLS.TARGET} Optimal coordinates: RA {best_coord.ra.hour:.4f}h, Dec {best_coord.dec.deg:.4f}° ({direction} of zenith)")
+                print(f"[SUNRISE] Eastern preference applied - target will stay above horizon longer")
             else:
                 direction = "west"
-                print(f"✅ Found optimal dark patch {max_min_separation:.2f}° from nearest bright star")
-                print(f"📍 Optimal coordinates: RA {best_coord.ra.hour:.4f}h, Dec {best_coord.dec.deg:.4f}° ({direction} of zenith)")
-                print(f"⚠️  No suitable eastern target found - using western target")
+                print(f"{SYMBOLS.SUCCESS} Found optimal dark patch {max_min_separation:.2f}° from nearest bright star")
+                print(f"{SYMBOLS.TARGET} Optimal coordinates: RA {best_coord.ra.hour:.4f}h, Dec {best_coord.dec.deg:.4f}° ({direction} of zenith)")
+                print(f"{SYMBOLS.WARNING} No suitable eastern target found - using western target")
             
             # Check and report meridian flip risk for the selected target
             meridian_risk = self._calculate_meridian_flip_risk(best_coord, estimated_duration)
             if meridian_risk > 0.1:  # More than 10% risk
-                print(f"⚠️  Meridian flip risk: {meridian_risk:.1%} - consider shorter experiment or different target")
+                print(f"{SYMBOLS.WARNING} Meridian flip risk: {meridian_risk:.1%} - consider shorter experiment or different target")
             else:
-                print(f"✅ Meridian flip risk: {meridian_risk:.1%} - safe for experiment duration")
+                print(f"{SYMBOLS.SUCCESS} Meridian flip risk: {meridian_risk:.1%} - safe for experiment duration")
             
             return best_coord
             
         except Exception as e:
-            print(f"⚠️  Error finding optimal dark patch: {e}")
+            print(f"{SYMBOLS.ERROR} Error finding optimal dark patch: {e}")
             return zenith_coords
     
     def find_and_slew_to_optimal_target(self) -> bool:
         """Find and slew to an optimal observation target near zenith."""
         # Check prerequisites
         if not self.mount:
-            print("⚠️  No mount available, skipping optimal target finding")
+            print(f"{SYMBOLS.WARNING} No mount available, skipping optimal target finding")
             return False
         
         if not self.location:
-            print("⚠️  No telescope location available, skipping optimal target finding")
+            print(f"{SYMBOLS.WARNING} No telescope location available, skipping optimal target finding")
             return False
         
         if not ASTROQUERY_AVAILABLE:
-            print("⚠️  astroquery not available, falling back to zenith slew")
+            print(f"{SYMBOLS.WARNING} astroquery not available, falling back to zenith slew")
             return self.slew_to_zenith()
         
         try:
-            print("🎯 Finding optimal observation target near zenith...")
+            print(f"{SYMBOLS.TARGET} Finding optimal observation target near zenith...")
             
             # Step 1: Calculate current zenith coordinates
             zenith_coords = self._get_zenith_coordinates()
             if not zenith_coords:
-                print("⚠️  Could not calculate zenith coordinates")
+                print(f"{SYMBOLS.WARNING} Could not calculate zenith coordinates")
                 return False
             
             # Step 2: Query for bright stars near zenith
@@ -1164,23 +1201,23 @@ class SubExposureCalculator:
             
             # Step 4: Slew to optimal coordinates
             if optimal_coords.separation(zenith_coords) < 0.1 * u.deg:
-                print("✅ Zenith is optimal target - no bright stars nearby")
+                print(f"{SYMBOLS.SUCCESS} Zenith is optimal target - no bright stars nearby")
                 success = self._slew_to_coordinates(optimal_coords)
             else:
-                print(f"✅ Slew to optimal dark patch (offset: {optimal_coords.separation(zenith_coords):.2f})")
+                print(f"{SYMBOLS.SUCCESS} Slew to optimal dark patch (offset: {optimal_coords.separation(zenith_coords):.2f})")
                 success = self._slew_to_coordinates(optimal_coords)
             
             # Store current target coordinates and update timestamp for zenith tracking
             if success:
                 self.current_target_coords = optimal_coords
                 self.last_zenith_update = time.time()
-                print("📍 Zenith tracking initialized")
+                print(f"{SYMBOLS.TARGET} Zenith tracking initialized")
             
             return success
                 
         except Exception as e:
-            print(f"⚠️  Error in optimal target finding: {e}")
-            print("🔄 Falling back to zenith slew...")
+            print(f"{SYMBOLS.ERROR} Error in optimal target finding: {e}")
+            print(f"{SYMBOLS.WARNING} Falling back to zenith slew...")
             return self.slew_to_zenith()
     
     def _check_zenith_drift(self) -> bool:
@@ -1211,7 +1248,7 @@ class SubExposureCalculator:
         if current_zenith:
             drift_distance = self.current_target_coords.separation(current_zenith)
             if drift_distance > self.zenith_tracking_threshold * u.deg:
-                print(f"📍 Zenith drift detected: {drift_distance:.2f} from zenith")
+                print(f"[LOC] Zenith drift detected: {drift_distance:.2f} from zenith")
                 return True
         
         return False
@@ -1224,7 +1261,7 @@ class SubExposureCalculator:
             True if successfully updated and slewed
         """
         try:
-            print("🔄 Updating zenith target position...")
+            print(f"{SYMBOLS.SWITCH} Updating zenith target position...")
             
             # Calculate new zenith coordinates
             new_zenith = self._get_zenith_coordinates()
@@ -1238,11 +1275,11 @@ class SubExposureCalculator:
                 
                 # If zenith has moved significantly, recalculate optimal target
                 if zenith_drift > 1.0 * u.deg:  # 1 degree threshold for recalculating optimal target
-                    print(f"🌌 Zenith has moved {zenith_drift:.2f} - recalculating optimal target")
+                    print(f"�� Zenith has moved {zenith_drift:.2f} - recalculating optimal target")
                     return self.find_and_slew_to_optimal_target()
                 else:
                     # Zenith hasn't moved much, just update current target to new zenith
-                    print(f"🌌 Zenith has moved {zenith_drift:.2f} - updating target position")
+                    print(f"[UNIV] Zenith has moved {zenith_drift:.2f} - updating target position")
                     self.current_target_coords = new_zenith
                     return self._slew_to_coordinates(new_zenith)
             else:
@@ -1250,7 +1287,7 @@ class SubExposureCalculator:
                 return self.find_and_slew_to_optimal_target()
                 
         except Exception as e:
-            print(f"⚠️  Error updating zenith target: {e}")
+            print(f"{SYMBOLS.ERROR} Error updating zenith target: {e}")
             return False
     
     def _get_zenith_coordinates_at_time(self, timestamp: float) -> Optional[SkyCoord]:
@@ -1278,7 +1315,7 @@ class SubExposureCalculator:
             return ra_dec
             
         except Exception as e:
-            print(f"⚠️  Error calculating zenith at timestamp: {e}")
+            print(f"{SYMBOLS.ERROR} Error calculating zenith at timestamp: {e}")
             return None
     
     def _calculate_meridian_flip_risk(self, target_coords: SkyCoord, experiment_duration: float = 180.0) -> float:
@@ -1324,7 +1361,7 @@ class SubExposureCalculator:
                 return 0.0
                 
         except Exception as e:
-            print(f"⚠️  Error calculating meridian flip risk: {e}")
+            print(f"{SYMBOLS.ERROR} Error calculating meridian flip risk: {e}")
             return 0.0
     
     def _estimate_experiment_duration(self, exposure_times: List[int], frames_per_light: int, num_filters: int) -> float:
@@ -1360,7 +1397,7 @@ class SubExposureCalculator:
             return total_time
             
         except Exception as e:
-            print(f"⚠️  Error estimating experiment duration: {e}")
+            print(f"{SYMBOLS.ERROR} Error estimating experiment duration: {e}")
             return 180.0  # Default 3 hours
     
     def start_guiding(self):
@@ -1371,87 +1408,87 @@ class SubExposureCalculator:
         # If external guiding is active, use it
         if self.external_guiding_active:
             if self.phd2_running:
-                print("🎯 Using PHD2 for guiding (external software detected)")
+                print(f"{SYMBOLS.TARGET} Using PHD2 for guiding (external software detected)")
                 return self._start_phd2_guiding()
             elif self.ekos_running:
-                print("🎯 Using EKOS for guiding (external software detected)")
+                print(f"{SYMBOLS.TARGET} Using EKOS for guiding (external software detected)")
                 return self._start_ekos_guiding()
         
         # Fallback to built-in guiding
         if not self.guide_camera or not self.mount:
-            print("⚠️  No guide camera or mount available, skipping guiding")
+            print(f"{SYMBOLS.WARNING} No guide camera or mount available, skipping guiding")
             return False
         
-        print("🎯 Using built-in guiding (no external software detected)")
+        print(f"{SYMBOLS.TARGET} Using built-in guiding (no external software detected)")
         return self._start_builtin_guiding()
     
     def _start_phd2_guiding(self) -> bool:
         """Start guiding using PHD2."""
         try:
-            print("🎯 Connecting to PHD2...")
+            print(f"{SYMBOLS.TARGET} Connecting to PHD2...")
             
             # Check if PHD2 is connected and ready
             if not self._check_phd2_connected():
-                print("❌ PHD2 is running but not connected to equipment")
+                print(f"{SYMBOLS.ERROR} PHD2 is running but not connected to equipment")
                 return False
             
             # Check if PHD2 is already guiding
             if self._check_phd2_guiding():
-                print("✅ PHD2 is already guiding")
+                print(f"{SYMBOLS.SUCCESS} PHD2 is already guiding")
                 return True
             
             # Start PHD2 guiding
-            print("🎯 Starting PHD2 guiding...")
+            print(f"{SYMBOLS.TARGET} Starting PHD2 guiding...")
             if self._start_phd2_guiding_sequence():
-                print("✅ PHD2 guiding started successfully")
+                print(f"{SYMBOLS.SUCCESS} PHD2 guiding started successfully")
                 return True
             else:
-                print("❌ Failed to start PHD2 guiding")
+                print(f"{SYMBOLS.ERROR} Failed to start PHD2 guiding")
                 return False
                 
         except Exception as e:
-            print(f"❌ Error starting PHD2 guiding: {e}")
+            print(f"{SYMBOLS.ERROR} Error starting PHD2 guiding: {e}")
             return False
     
     def _start_ekos_guiding(self) -> bool:
         """Start guiding using EKOS."""
         try:
-            print("🎯 Using EKOS guiding...")
+            print(f"{SYMBOLS.TARGET} Using EKOS guiding...")
             
             # EKOS guiding is typically handled through INDI
             # We'll assume it's already set up and ready
-            print("✅ EKOS guiding is ready")
+            print(f"{SYMBOLS.SUCCESS} EKOS guiding is ready")
             return True
             
         except Exception as e:
-            print(f"❌ Error with EKOS guiding: {e}")
+            print(f"{SYMBOLS.ERROR} Error with EKOS guiding: {e}")
             return False
     
     def _start_builtin_guiding(self) -> bool:
         """Start the built-in guiding process."""
         try:
-            print("🎯 Starting built-in guiding process...")
+            print(f"{SYMBOLS.TARGET} Starting built-in guiding process...")
             
             # Step 1: Take a guide exposure to find guide stars
-            print("  📸 Taking guide exposure to find guide stars...")
+            print("  [CAM] Taking guide exposure to find guide stars...")
             guide_image = self.capture_guide_frame()
             if guide_image is None:
-                print("❌ Failed to capture guide frame")
+                print(f"{SYMBOLS.ERROR} Failed to capture guide frame")
                 return False
             
             # Step 2: Find and select a guide star
-            print("  🔍 Finding guide stars...")
+            print("  [FOCUS] Finding guide stars...")
             guide_star = self.find_guide_star(guide_image)
             if guide_star is None:
-                print("❌ No suitable guide star found")
+                print(f"{SYMBOLS.ERROR} No suitable guide star found")
                 return False
             
-            print(f"  ⭐ Selected guide star at position: ({guide_star['x']:.1f}, {guide_star['y']:.1f})")
+            print(f"  {SYMBOLS.STAR} Selected guide star at position: ({guide_star['x']:.1f}, {guide_star['y']:.1f})")
             self.guide_star_initial_position = (guide_star['x'], guide_star['y'])
             self.guide_star_position = (guide_star['x'], guide_star['y'])
             
             # Step 3: Start guiding thread
-            print("  🎯 Starting guiding thread...")
+            print(f"{SYMBOLS.TARGET} Starting guiding thread...")
             self.guiding_stop_event.clear()
             self.guiding_thread = threading.Thread(target=self._guiding_loop, daemon=True)
             self.guiding_thread.start()
@@ -1461,11 +1498,11 @@ class SubExposureCalculator:
             print("  ⏳ Waiting for guiding to stabilize...")
             time.sleep(5)  # Give guiding time to start
             
-            print("✅ Built-in guiding started successfully")
+            print(f"{SYMBOLS.SUCCESS} Built-in guiding started successfully")
             return True
             
         except Exception as e:
-            print(f"❌ Error starting built-in guiding: {e}")
+            print(f"{SYMBOLS.ERROR} Error starting built-in guiding: {e}")
             return False
     
     def _check_phd2_connected(self) -> bool:
@@ -1520,21 +1557,21 @@ class SubExposureCalculator:
         """Stop the guiding process."""
         if self.external_guiding_active:
             if self.phd2_running:
-                print("🛑 Stopping PHD2 guiding...")
+                print(f"{SYMBOLS.STOP} Stopping PHD2 guiding...")
                 self._stop_phd2_guiding()
             elif self.ekos_running:
-                print("🛑 Stopping EKOS guiding...")
+                print(f"{SYMBOLS.STOP} Stopping EKOS guiding...")
                 # EKOS guiding is typically managed by the user
-                print("ℹ️  Please stop EKOS guiding manually if needed")
+                print("[INFO]  Please stop EKOS guiding manually if needed")
             self.external_guiding_active = False
-            print("✅ External guiding stopped")
+            print(f"{SYMBOLS.SUCCESS} External guiding stopped")
         elif self.guiding_active:
-            print("🛑 Stopping built-in guiding...")
+            print(f"{SYMBOLS.STOP} Stopping built-in guiding...")
             self.guiding_stop_event.set()
             if self.guiding_thread and self.guiding_thread.is_alive():
                 self.guiding_thread.join(timeout=5)
             self.guiding_active = False
-            print("✅ Built-in guiding stopped")
+            print(f"{SYMBOLS.SUCCESS} Built-in guiding stopped")
     
     def _stop_phd2_guiding(self):
         """Stop PHD2 guiding."""
@@ -1548,11 +1585,11 @@ class SubExposureCalculator:
                 response = sock.recv(1024).decode('utf-8')
                 sock.close()
                 if '"result": true' in response:
-                    print("✅ PHD2 guiding stopped successfully")
+                    print(f"{SYMBOLS.SUCCESS} PHD2 guiding stopped successfully")
                 else:
-                    print("⚠️  PHD2 guiding stop command may have failed")
+                    print(f"{SYMBOLS.WARNING} PHD2 guiding stop command may have failed")
         except Exception as e:
-            print(f"⚠️  Error stopping PHD2 guiding: {e}")
+            print(f"{SYMBOLS.ERROR} Error stopping PHD2 guiding: {e}")
     
     def capture_guide_frame(self) -> Optional[np.ndarray]:
         """Capture a single guide frame."""
@@ -1579,7 +1616,7 @@ class SubExposureCalculator:
                 return raw_data
             
         except Exception as e:
-            print(f"⚠️  Error capturing guide frame: {e}")
+            print(f"{SYMBOLS.ERROR} Error capturing guide frame: {e}")
         
         return None
     
@@ -1640,7 +1677,7 @@ class SubExposureCalculator:
             }
             
         except Exception as e:
-            print(f"⚠️  Error finding guide star: {e}")
+            print(f"{SYMBOLS.ERROR} Error finding guide star: {e}")
             return None
     
     def _estimate_fwhm(self, image_data: np.ndarray, x: int, y: int) -> float:
@@ -1666,7 +1703,7 @@ class SubExposureCalculator:
     
     def _guiding_loop(self):
         """Main guiding loop that runs in a separate thread."""
-        print("  🎯 Guiding loop started")
+        print(f"{SYMBOLS.TARGET} Guiding loop started")
         
         while not self.guiding_stop_event.is_set():
             try:
@@ -1697,10 +1734,10 @@ class SubExposureCalculator:
                 time.sleep(self.guide_exposure_time)
                 
             except Exception as e:
-                print(f"⚠️  Error in guiding loop: {e}")
+                print(f"{SYMBOLS.ERROR} Error in guiding loop: {e}")
                 time.sleep(1)
         
-        print("  🛑 Guiding loop stopped")
+        print(f"{SYMBOLS.STOP} Guiding loop stopped")
     
     def _find_star_position(self, image_data: np.ndarray, expected_position: Tuple[float, float]) -> Optional[Tuple[float, float]]:
         """Find the current position of the guide star."""
@@ -1761,7 +1798,7 @@ class SubExposureCalculator:
                     self._send_guide_pulse('GUIDE_NORTH', pulse_y)
                     
         except Exception as e:
-            print(f"⚠️  Error applying guide correction: {e}")
+            print(f"{SYMBOLS.ERROR} Error applying guide correction: {e}")
     
     def _send_guide_pulse(self, direction: str, duration: int):
         """Send a guide pulse to the mount."""
@@ -1788,7 +1825,7 @@ class SubExposureCalculator:
                             return
                             
         except Exception as e:
-            print(f"⚠️  Error sending guide pulse: {e}")
+            print(f"{SYMBOLS.ERROR} Error sending guide pulse: {e}")
     
 
     
@@ -1826,7 +1863,7 @@ class SubExposureCalculator:
             
             # Check if we have enough valid pixels
             if sky_region.size < self.min_valid_pixels:
-                print(f"⚠️  Warning: Sky region too small ({sky_region.size} pixels), using full image")
+                print(f"{SYMBOLS.WARNING} Warning: Sky region too small ({sky_region.size} pixels), using full image")
                 sky_region = image_data
             
             # Use sigma-clipped stats with configurable threshold
@@ -1835,7 +1872,7 @@ class SubExposureCalculator:
             return median
             
         except Exception as e:
-            print(f"⚠️  Error in sky background analysis: {e}")
+            print(f"{SYMBOLS.ERROR} Error in sky background analysis: {e}")
             # Fallback to simple median
             return np.median(image_data)
     
@@ -1924,7 +1961,7 @@ class SubExposureCalculator:
                 return None, None
                 
         except Exception as e:
-            print(f"⚠️  Error in image quality analysis: {e}")
+            print(f"{SYMBOLS.ERROR} Error in image quality analysis: {e}")
             return None, None
     
     def _calculate_fwhm(self, stamp: np.ndarray, background: float) -> Optional[float]:
@@ -2020,7 +2057,7 @@ class SubExposureCalculator:
         Returns:
             Tuple of (predicted_optimal_time, dynamic_exposure_times, fwhm)
         """
-        print(f"  🎯 Phase A: Intelligent Scout & Prediction for {filter_name}")
+        print(f"{SYMBOLS.TARGET} [TARGET] Phase A: Intelligent Scout & Prediction for {filter_name}")
         
         # Get camera properties for this filter
         camera_props = self.get_camera_properties(filter_name)
@@ -2029,48 +2066,48 @@ class SubExposureCalculator:
         
         # Calculate target ADU
         target_adu = self.calculate_target_adu(gain, read_noise)
-        print(f"    📊 Target ADU: {target_adu:.2f}")
-        print(f"    📊 Camera Gain: {gain:.2f}, Read Noise: {read_noise:.2f}")
+        print(f"    [CHART] Target ADU: {target_adu:.2f}")
+        print(f"    [CHART] Camera Gain: {gain:.2f}, Read Noise: {read_noise:.2f}")
         
         # Ensure dark frame for scout exposure exists (use library)
         scout_dark_path = self.find_best_dark_frame(self.scout_exposure_time)
         if not scout_dark_path:
-            print(f"    ❌ No dark frame available for scout exposure ({self.scout_exposure_time}s)")
-            print(f"    📸 Creating scout dark frame for {self.scout_exposure_time}s...")
+            print(f"{SYMBOLS.ERROR} No dark frame available for scout exposure ({self.scout_exposure_time}s)")
+            print(f"    [CAM] Creating scout dark frame for {self.scout_exposure_time}s...")
             self.create_master_dark_library(self.scout_exposure_time)
             scout_dark_path = self.find_best_dark_frame(self.scout_exposure_time)
         
         # Take scout light frame
-        print(f"    📸 Taking scout exposure ({self.scout_exposure_time}s)...")
+        print(f"    [CAM] Taking scout exposure ({self.scout_exposure_time}s)...")
         scout_image = self.capture_light_frame_with_filter(self.scout_exposure_time, filter_name)
         
         if scout_image is None:
-            print("    ❌ Failed to capture scout frame")
+            print(f"{SYMBOLS.ERROR} Failed to capture scout frame")
             # Fallback to default exposure times
             return 120.0, [60, 120, 180, 240, 300], None
         
         # Analyze scout frame for sky background and image quality
         scout_adu = self.analyze_sky_background(scout_image)
-        print(f"    📊 Scout frame sky ADU: {scout_adu:.2f}")
+        print(f"    [CHART] Scout frame sky ADU: {scout_adu:.2f}")
         
         # Analyze image quality to get FWHM for seeing assessment
         fwhm, ecc = self.analyze_image_quality(scout_image)
         
         # Adjust frames_per_light based on seeing conditions
         if fwhm is not None:
-            print(f"    📊 Measured FWHM: {fwhm:.2f} pixels")
+            print(f"    [CHART] Measured FWHM: {fwhm:.2f} pixels")
             self.adjust_frames_per_light_based_on_seeing(fwhm)
         else:
-            print("    ⚠️  Warning: Could not determine seeing conditions from scout frame")
-            print("    📊 Using default frames_per_light value")
+            print(f"{SYMBOLS.WARNING} Warning: Could not determine seeing conditions from scout frame")
+            print("    [CHART] Using default frames_per_light value")
         
         # Calculate sky flux rate
         sky_flux_rate = scout_adu / self.scout_exposure_time
-        print(f"    📊 Sky flux rate: {sky_flux_rate:.2f} ADU/sec")
+        print(f"    [CHART] Sky flux rate: {sky_flux_rate:.2f} ADU/sec")
         
         # Predict optimal time
         predicted_optimal_time = target_adu / sky_flux_rate
-        print(f"    🎯 Predicted optimal time: {predicted_optimal_time:.1f}s")
+        print(f"    [TARGET] Predicted optimal time: {predicted_optimal_time:.1f}s")
         
         # Generate dynamic test range
         dynamic_times = self.generate_dynamic_test_range(predicted_optimal_time)
@@ -2126,9 +2163,9 @@ class SubExposureCalculator:
         Returns:
             True if library creation was successful
         """
-        print("  📸 Phase C: Creating Dark Frame Library")
-        print("    🎯 This creates darks for a range of exposure times upfront")
-        print("    🎯 These will be used throughout the experiment automatically")
+        print(f"{SYMBOLS.CAMERA} [CAM] Phase C: Creating Dark Frame Library")
+        print("    [TARGET] This creates darks for a range of exposure times upfront")
+        print("    [TARGET] These will be used throughout the experiment automatically")
         
         # Define exposure times for dark library (covering typical ranges)
         dark_library_times = [10, 15, 20, 30, 45, 60, 90, 120, 180, 240, 300, 420, 600, 900, 1200, 1800]
@@ -2145,23 +2182,23 @@ class SubExposureCalculator:
                 missing_darks.append(exposure_time)
         
         if existing_darks:
-            print(f"    ✅ Existing darks found for: {', '.join(map(str, existing_darks))}s")
+            print(f"    {SYMBOLS.SUCCESS} Existing darks found for: {', '.join(map(str, existing_darks))}s")
         
         if missing_darks:
-            print(f"    📸 Need to create darks for: {', '.join(map(str, missing_darks))}s")
+            print(f"    [CAM] Need to create darks for: {', '.join(map(str, missing_darks))}s")
             print("    🔒 Please cover the telescope and press Enter when ready...")
             input()
             
             # Create missing master darks
             for exposure_time in missing_darks:
-                print(f"      📸 Creating dark for {exposure_time}s...")
+                print(f"      [CAM] Creating dark for {exposure_time}s...")
                 self.create_master_dark_library(exposure_time)
             
-            print("    🔓 Please uncover the telescope and press Enter when ready...")
+            print("    [UNLOCK] Please uncover the telescope and press Enter when ready...")
             input()
-            print("    ✅ Dark frame library complete!")
+            print(f"{SYMBOLS.SUCCESS} Dark frame library complete!")
         else:
-            print("    ✅ Dark frame library already complete!")
+            print(f"{SYMBOLS.SUCCESS} Dark frame library already complete!")
         
         return True
     
@@ -2170,10 +2207,10 @@ class SubExposureCalculator:
         dark_path = self.calibration_path / f"master_dark_library_{exposure_time}s.fits"
         
         if dark_path.exists():
-            print(f"      ✅ Master dark for {exposure_time}s already exists")
+            print(f"      {SYMBOLS.SUCCESS} Master dark for {exposure_time}s already exists")
             return str(dark_path)
         
-        print(f"      📸 Creating master dark for {exposure_time}s exposure...")
+        print(f"      [CAM] Creating master dark for {exposure_time}s exposure...")
         
         # Set exposure time
         exp_prop = self.camera.getProperty('CCD_EXPOSURE')
@@ -2217,7 +2254,7 @@ class SubExposureCalculator:
             for frame in dark_frames:
                 frame.unlink()
             
-            print(f"        ✅ Master dark saved to {dark_path}")
+            print(f"        {SYMBOLS.SUCCESS} Master dark saved to {dark_path}")
             return str(dark_path)
         
         return None
@@ -2247,10 +2284,10 @@ class SubExposureCalculator:
         if closest_dark_path.exists():
             time_diff = abs(closest_time - exposure_time)
             if time_diff <= 30:  # Within 30 seconds is acceptable
-                print(f"      📸 Using dark frame for {closest_time}s (closest to {exposure_time}s)")
+                print(f"      [CAM] Using dark frame for {closest_time}s (closest to {exposure_time}s)")
                 return str(closest_dark_path)
             else:
-                print(f"      ⚠️  Warning: Using dark frame for {closest_time}s (diff: {time_diff}s)")
+                print(f"      {SYMBOLS.WARNING}  Warning: Using dark frame for {closest_time}s (diff: {time_diff}s)")
                 return str(closest_dark_path)
         
         return None
@@ -2286,11 +2323,11 @@ class SubExposureCalculator:
             hdu = fits.PrimaryHDU(scaled_dark)
             hdu.writeto(scaled_dark_path, overwrite=True)
             
-            print(f"      📸 Created scaled dark frame for {target_time}s (scaled from {source_time}s)")
+            print(f"      [CAM] Created scaled dark frame for {target_time}s (scaled from {source_time}s)")
             return str(scaled_dark_path)
             
         except Exception as e:
-            print(f"      ❌ Error creating scaled dark frame: {e}")
+            print(f"{SYMBOLS.ERROR} Error creating scaled dark frame: {e}")
             return None
     
     def create_master_dark_with_filter(self, exposure_time: int, filter_name: str) -> str:
@@ -2298,10 +2335,10 @@ class SubExposureCalculator:
         dark_path = self.calibration_path / f"master_dark_{filter_name}_{exposure_time}s.fits"
         
         if dark_path.exists():
-            print(f"    ✅ Master dark for {filter_name} {exposure_time}s already exists")
+            print(f"    {SYMBOLS.SUCCESS} Master dark for {filter_name} {exposure_time}s already exists")
             return str(dark_path)
         
-        print(f"    📸 Creating master dark for {filter_name} {exposure_time}s exposure...")
+        print(f"    [CAM] Creating master dark for {filter_name} {exposure_time}s exposure...")
         
         # Set exposure time
         exp_prop = self.camera.getProperty('CCD_EXPOSURE')
@@ -2345,7 +2382,7 @@ class SubExposureCalculator:
             for frame in dark_frames:
                 frame.unlink()
             
-            print(f"    ✅ Master dark saved to {dark_path}")
+            print(f"    {SYMBOLS.SUCCESS} Master dark saved to {dark_path}")
             return str(dark_path)
         
         return None
@@ -2390,10 +2427,10 @@ class SubExposureCalculator:
                     
                     calibrated_data = raw_data.astype(float) - dark_data
                 except Exception as e:
-                    print(f"      ⚠️  Error applying dark frame: {e}")
+                    print(f"{SYMBOLS.ERROR} Error applying dark frame: {e}")
                     calibrated_data = raw_data.astype(float)
             else:
-                print(f"      ⚠️  No dark frame available for {exposure_time}s exposure")
+                print(f"{SYMBOLS.WARNING} No dark frame available for {exposure_time}s exposure")
                 calibrated_data = raw_data.astype(float)
             
             return calibrated_data
@@ -2411,31 +2448,31 @@ class SubExposureCalculator:
         Returns:
             List of exposure results
         """
-        print(f"  🚀 Phase D: Execute Focused Experiment for {filter_name}")
+        print(f"{SYMBOLS.TARGET} [ROCKET] Phase D: Execute Focused Experiment for {filter_name}")
         
         # Find and slew to optimal target near zenith
         if self.mount:
-            print("    🎯 Finding and slewing to optimal target...")
+            print("    [TARGET] Finding and slewing to optimal target...")
             self.find_and_slew_to_optimal_target()
         
         # Perform filter-aware focusing
-        print("    🔍 Performing filter-aware focusing...")
+        print("    [FOCUS] Performing filter-aware focusing...")
         focusing_success = self.perform_focusing(filter_name)
         if not focusing_success:
-            print("    ⚠️  Warning: Focusing failed, continuing with current focus position")
+            print("    {SYMBOLS.WARNING}  Warning: Focusing failed, continuing with current focus position")
         else:
-            print("    ✅ Focusing completed successfully")
+            print("    {SYMBOLS.SUCCESS} Focusing completed successfully")
         
         # Test each exposure time
         exposure_results = []
         for exposure_time in exposure_times:
-            print(f"    📸 Capturing {self.frames_per_light} frames at {exposure_time}s...")
+            print(f"    [CAM] Capturing {self.frames_per_light} frames at {exposure_time}s...")
             
             # Check for zenith drift before starting this exposure time
             if self.zenith_tracking_enabled and self._check_zenith_drift():
-                print("    🔄 Zenith drift detected - updating target position...")
+                print("    {SYMBOLS.REFRESH} Zenith drift detected - updating target position...")
                 if not self._update_zenith_target():
-                    print("    ⚠️  Failed to update zenith target, continuing with current position")
+                    print("    {SYMBOLS.WARNING}  Failed to update zenith target, continuing with current position")
             
             # Capture multiple frames and analyze
             sky_adus = []
@@ -2450,9 +2487,9 @@ class SubExposureCalculator:
                     frame_num > 0 and 
                     frame_num % 2 == 0 and  # Check every 2nd frame
                     self._check_zenith_drift()):
-                    print("      🔄 Zenith drift detected during exposure sequence...")
+                    print("      {SYMBOLS.REFRESH} Zenith drift detected during exposure sequence...")
                     if not self._update_zenith_target():
-                        print("      ⚠️  Failed to update zenith target, continuing with current position")
+                        print("      {SYMBOLS.WARNING}  Failed to update zenith target, continuing with current position")
                 
                 image_data = self.capture_light_frame_with_filter(exposure_time, filter_name)
                 if image_data is not None:
@@ -2514,9 +2551,9 @@ class SubExposureCalculator:
         # Return the minimum of the two times
         optimal_time = min(noise_based_time, quality_based_time)
         
-        print(f"    📊 Noise-based optimal time: {noise_based_time:.1f}s")
-        print(f"    📊 Quality-based optimal time: {quality_based_time:.1f}s")
-        print(f"    📊 Final optimal time: {optimal_time:.1f}s")
+        print(f"    [CHART] Noise-based optimal time: {noise_based_time:.1f}s")
+        print(f"    [CHART] Quality-based optimal time: {quality_based_time:.1f}s")
+        print(f"    [CHART] Final optimal time: {optimal_time:.1f}s")
         
         return optimal_time
     
@@ -2569,8 +2606,8 @@ class SubExposureCalculator:
         Returns:
             List of refinement results with detailed quality analysis
         """
-        print(f"  🔎 Refining exposure for {filter_name} filter...")
-        print(f"    🎯 Initial optimal time: {scout_time:.1f}s")
+        print(f"{SYMBOLS.FOCUS} [REFINE] Refining exposure for {filter_name} filter...")
+        print(f"    [TARGET] Initial optimal time: {scout_time:.1f}s")
         
         # Define search range centered around scout_time
         min_exposure = max(10, scout_time - (self.refinement_steps * self.refinement_step_size))
@@ -2588,7 +2625,7 @@ class SubExposureCalculator:
             refinement_times.append(int(scout_time))
         
         refinement_times = sorted(list(set(refinement_times)))  # Remove duplicates and sort
-        print(f"    📊 Refinement test range: {refinement_times}")
+        print(f"    [CHART] Refinement test range: {refinement_times}")
         
         # Execute granular test
         refinement_results = []
@@ -2672,25 +2709,25 @@ class SubExposureCalculator:
     
     def run_intelligent_experiment(self):
         """Run the main experiment using the Intelligent Scout method."""
-        print("🚀 Starting Intelligent Scout experiment...")
+        print(f"{SYMBOLS.TARGET} [ROCKET] Starting Intelligent Scout experiment...")
         
         # Start guiding system
-        print("\n🎯 Starting guiding system...")
+        print(f"\n[TARGET] Starting guiding system...")
         guiding_started = self.start_guiding()
         if not guiding_started:
-            print("⚠️  Warning: Guiding could not be started. Long exposures may have tracking issues.")
+            print(f"{SYMBOLS.WARNING} Warning: Guiding could not be started. Long exposures may have tracking issues.")
         else:
             if self.external_guiding_active:
                 if self.phd2_running:
-                    print("✅ Using PHD2 for guiding - industry standard software")
+                    print(f"{SYMBOLS.TARGET} Using PHD2 for guiding - industry standard software")
                 elif self.ekos_running:
-                    print("✅ Using EKOS for guiding - integrated with KStars")
+                    print(f"{SYMBOLS.TARGET} Using EKOS for guiding - integrated with KStars")
             else:
-                print("✅ Using built-in guiding system")
+                print(f"{SYMBOLS.SUCCESS} Using built-in guiding system")
         
         # Main experiment loop - filter by filter with Intelligent Scout
         for filter_name in self.filter_names:
-            print(f"\n🎨 Processing {filter_name} filter...")
+            print(f"\n[SWITCH] Processing {filter_name} filter...")
             print("="*60)
             
             # Set filter
@@ -2703,9 +2740,9 @@ class SubExposureCalculator:
                         filter_prop[0].setNumber(filter_index)
                         self.client.sendNewProperty(filter_prop)
                         time.sleep(2)  # Wait for filter change
-                        print(f"  🎨 Filter set to: {filter_name}")
+                        print(f"  [SWITCH] Filter set to: {filter_name}")
                     except ValueError:
-                        print(f"⚠️  Filter {filter_name} not found in filter wheel")
+                        print(f"{SYMBOLS.ERROR} Filter {filter_name} not found in filter wheel")
                         continue
             
             # Get camera properties for this filter
@@ -2733,7 +2770,7 @@ class SubExposureCalculator:
                 
                 # Check if refinement phase is enabled
                 if self.refine_exposure:
-                    print(f"  🔎 Starting refinement phase for {filter_name}...")
+                    print(f"{SYMBOLS.FOCUS} [REFINE] Starting refinement phase for {filter_name}...")
                     refinement_results = self.run_refinement_phase(filter_name, optimal_exposure)
                     refined_time = self.find_refined_optimal_exposure(refinement_results)
                     
@@ -2752,9 +2789,9 @@ class SubExposureCalculator:
                         'scout_fwhm': scout_fwhm
                     }
                     
-                    print(f"  ✅ Refined optimal exposure for {filter_name}: {refined_time:.1f}s (refined)")
-                    print(f"  📊 Scout time: {optimal_exposure:.1f}s, Refined time: {refined_time:.1f}s")
-                    print(f"  📊 Prediction accuracy: {abs(refined_time - predicted_time):.1f}s difference")
+                    print(f"  {SYMBOLS.SUCCESS} Refined optimal exposure for {filter_name}: {refined_time:.1f}s (refined)")
+                    print(f"  [CHART] Scout time: {optimal_exposure:.1f}s, Refined time: {refined_time:.1f}s")
+                    print(f"  [CHART] Prediction accuracy: {abs(refined_time - predicted_time):.1f}s difference")
                 else:
                     self.results[filter_name] = {
                         'optimal_exposure': optimal_exposure,
@@ -2768,19 +2805,19 @@ class SubExposureCalculator:
                         'scout_fwhm': scout_fwhm
                     }
                     
-                    print(f"  ✅ Optimal exposure for {filter_name}: {optimal_exposure:.1f}s")
-                    print(f"  📊 Prediction accuracy: {abs(optimal_exposure - predicted_time):.1f}s difference")
+                    print(f"  {SYMBOLS.SUCCESS} Optimal exposure for {filter_name}: {optimal_exposure:.1f}s")
+                    print(f"  [CHART] Prediction accuracy: {abs(optimal_exposure - predicted_time):.1f}s difference")
             else:
-                print(f"❌ No valid results for {filter_name}")
+                print(f"{SYMBOLS.ERROR} No valid results for {filter_name}")
     
     def print_results(self):
         """Print the final results in a formatted table."""
         print("\n" + "="*100)
-        print("📊 INTELLIGENT SCOUT SUB-EXPOSURE CALCULATOR RESULTS")
+        print(f"{SYMBOLS.CAMERA} INTELLIGENT SCOUT SUB-EXPOSURE CALCULATOR RESULTS")
         print("="*100)
         
         if not self.results:
-            print("❌ No results to display")
+            print(f"{SYMBOLS.ERROR} No results to display")
             return
         
         # Print header
@@ -2806,56 +2843,56 @@ class SubExposureCalculator:
             # Check for warnings
             warning = ""
             if optimal_exp > 600:  # 10 minutes
-                warning = " ⚠️  LONG"
+                warning = " {SYMBOLS.WARNING}  LONG"
             elif optimal_exp > 300:  # 5 minutes
-                warning = " ⚠️  MODERATE"
+                warning = " {SYMBOLS.WARNING}  MODERATE"
             
             print(f"{filter_name:<12} {optimal_exp:<12.1f}{refinement_marker:<12} {predicted_time:<12.1f} {accuracy:<12.1f} {gain:<8.2f} {read_noise:<8.2f} {target_adu:<12.1f} {scout_fwhm_str:<12} {test_range_str:<20}{warning}")
         
         print("-" * 100)
         
         # Print detailed quality analysis
-        print("\n📊 DETAILED QUALITY ANALYSIS")
+        print("\n[CHART] DETAILED QUALITY ANALYSIS")
         print("-" * 60)
         
         for filter_name, result in self.results.items():
-            print(f"\n🎨 {filter_name} Filter:")
+            print(f"\n[SWITCH] {filter_name} Filter:")
             quality_data = self.image_quality_results.get(filter_name, [])
             
             if quality_data:
-                print(f"  📊 Tested exposure times: {[d['time'] for d in quality_data]}")
+                print(f"  [CHART] Tested exposure times: {[d['time'] for d in quality_data]}")
                 adu_values = [f"{d['adu']:.1f}" for d in quality_data]
-                print(f"  📊 Sky ADU values: {adu_values}")
+                print(f"  [CHART] Sky ADU values: {adu_values}")
                 
                 # Find best FWHM
                 valid_fwhm = [(d['time'], d['fwhm']) for d in quality_data if d['fwhm'] is not None]
                 if valid_fwhm:
                     best_fwhm = min(valid_fwhm, key=lambda x: x[1])
-                    print(f"  ⭐ Best FWHM: {best_fwhm[1]:.2f} pixels at {best_fwhm[0]}s")
+                    print(f"  {SYMBOLS.STAR} Best FWHM: {best_fwhm[1]:.2f} pixels at {best_fwhm[0]}s")
                 
                 # Find best eccentricity
                 valid_ecc = [(d['time'], d['ecc']) for d in quality_data if d['ecc'] is not None]
                 if valid_ecc:
                     best_ecc = min(valid_ecc, key=lambda x: x[1])
-                    print(f"  ⭐ Best Eccentricity: {best_ecc[1]:.3f} at {best_ecc[0]}s")
+                    print(f"  {SYMBOLS.STAR} Best Eccentricity: {best_ecc[1]:.3f} at {best_ecc[0]}s")
             
             # Show refinement information if applicable
             if result.get('is_refined', False):
-                print(f"  🔎 REFINEMENT PHASE:")
+                print(f"  [REFINE] REFINEMENT PHASE:")
                 refinement_data = result.get('refinement_results', [])
                 if refinement_data:
-                    print(f"    📊 Scout time: {result.get('scout_time', 0):.1f}s")
-                    print(f"    📊 Refinement test range: {[d['time'] for d in refinement_data]}")
+                    print(f"    [CHART] Scout time: {result.get('scout_time', 0):.1f}s")
+                    print(f"    [CHART] Refinement test range: {[d['time'] for d in refinement_data]}")
                     
                     # Find best FWHM in refinement
                     valid_refinement_fwhm = [(d['time'], d['fwhm']) for d in refinement_data if d['fwhm'] is not None]
                     if valid_refinement_fwhm:
                         best_refinement_fwhm = min(valid_refinement_fwhm, key=lambda x: x[1])
-                        print(f"    ⭐ Best refinement FWHM: {best_refinement_fwhm[1]:.2f} pixels at {best_refinement_fwhm[0]}s")
+                        print(f"    {SYMBOLS.STAR} Best refinement FWHM: {best_refinement_fwhm[1]:.2f} pixels at {best_refinement_fwhm[0]}s")
                     
                     # Show refinement ADU values
                     refinement_adu_values = [f"{d['adu']:.1f}" for d in refinement_data]
-                    print(f"    📊 Refinement ADU values: {refinement_adu_values}")
+                    print(f"    [CHART] Refinement ADU values: {refinement_adu_values}")
         
         print("\n💡 INTELLIGENT SCOUT METHODOLOGY:")
         print("  • Dark frame library created upfront for unattended operation")
@@ -2881,10 +2918,10 @@ class SubExposureCalculator:
         
         # Print focusing information if available
         if self.focus_positions:
-            print("\n🔍 FOCUSING INFORMATION:")
+            print("\n[FOCUS] FOCUSING INFORMATION:")
             print("-" * 60)
             for filter_name, focus_data in self.focus_positions.items():
-                print(f"  🎨 {filter_name}: Position {focus_data['position']} at {focus_data['temperature']:.1f}°C")
+                print(f"  [SWITCH] {filter_name}: Position {focus_data['position']} at {focus_data['temperature']:.1f}°C")
         
         print("\n💡 RECOMMENDATIONS:")
         print("  • FWHM values indicate star sharpness - lower is better")
@@ -2898,7 +2935,7 @@ class SubExposureCalculator:
             print("  • EKOS integration provides advanced focusing capabilities")
         
         if any(r['optimal_exposure'] > 600 for r in self.results.values()):
-            print("\n⚠️  WARNING: Some exposures are very long (>10 minutes)")
+            print("\n{SYMBOLS.WARNING}  WARNING: Some exposures are very long (>10 minutes)")
             print("  Consider using a higher gain setting or accepting lower SNR")
         
         # Print efficiency metrics
@@ -2926,12 +2963,12 @@ class SubExposureCalculator:
         
         if self.client:
             self.client.disconnectServer()
-            print("🔌 Disconnected from INDI server")
+            print(f"{SYMBOLS.DISCONNECT} Disconnected from INDI server")
     
     def run(self):
         """Main execution method."""
         try:
-            print("🌟 Sub-Exposure Calculator v6.1 - Intelligent Scout Method with Bracketing Search Refinement")
+            print(f"{SYMBOLS.CAMERA} [STAR] Sub-Exposure Calculator v6.1 - Intelligent Scout Method with Bracketing Search Refinement")
             print("="*60)
             
             # Phase 0: Setup and device discovery
@@ -2940,9 +2977,9 @@ class SubExposureCalculator:
             
             # Phase 1: Dark Frame Library Creation
             if not self.args.skip_dark_library:
-                print("\n📸 Phase 1: Dark Frame Library Creation")
+                print("\n[CAM] Phase 1: Dark Frame Library Creation")
                 print("="*60)
-                print("🎯 This creates a comprehensive library of dark frames upfront")
+                print("[TARGET] This creates a comprehensive library of dark frames upfront")
                 print("   • Covers exposure times from 10s to 1800s (30 minutes)")
                 print("   • Enables unattended operation throughout the experiment")
                 print("   • Automatically selects and scales darks as needed")
@@ -2950,17 +2987,17 @@ class SubExposureCalculator:
                 
                 self.create_dark_frame_library()
             else:
-                print("\n📸 Phase 1: Dark Frame Library (Skipped)")
+                print("\n[CAM] Phase 1: Dark Frame Library (Skipped)")
                 print("="*60)
-                print("🎯 Using existing dark frames only")
+                print("[TARGET] Using existing dark frames only")
                 print("   • Will use available darks from previous sessions")
                 print("   • May prompt for dark creation if needed")
                 print()
             
             # Phase 2: Intelligent Scout Experiment
-            print("\n🚀 Phase 2: Intelligent Scout Experiment")
+            print("\n[ROCKET] Phase 2: Intelligent Scout Experiment")
             print("="*60)
-            print("🎯 This method will:")
+            print("[TARGET] This method will:")
             print("   • Take a scout exposure to measure sky brightness")
             print("   • Predict optimal exposure time based on camera properties")
             print("   • Generate a focused test range around the prediction")
@@ -2971,14 +3008,14 @@ class SubExposureCalculator:
             self.run_intelligent_experiment()
             
             # Phase 3: Results
-            print("\n📊 Phase 3: Results")
+            print("\n[CHART] Phase 3: Results")
             print("="*60)
             self.print_results()
             
         except KeyboardInterrupt:
-            print("\n⚠️  Experiment interrupted by user")
+            print("\n{SYMBOLS.WARNING}  Experiment interrupted by user")
         except Exception as e:
-            print(f"\n❌ Error during execution: {e}")
+            print(f"\n[ERROR] Error during execution: {e}")
             import traceback
             traceback.print_exc()
         finally:
@@ -3006,8 +3043,8 @@ class SubExposureCalculator:
             self.frames_per_light = 10
             seeing_condition = "Poor"
         
-        print(f"    🌟 Seeing: {seeing_condition} (FWHM: {fwhm:.2f} pixels)")
-        print(f"    📊 Adjusted frames_per_light: {original_frames} → {self.frames_per_light}")
+        print(f"    [STAR] Seeing: {seeing_condition} (FWHM: {fwhm:.2f} pixels)")
+        print(f"    [CHART] Adjusted frames_per_light: {original_frames} → {self.frames_per_light}")
 
 
 def main():
