@@ -1,0 +1,8 @@
+pyindi-client>=1.9.0
+astropy>=5.0.0
+numpy>=1.21.0
+pytz>=2021.1
+photutils>=1.7.0
+scipy>=1.9.0
+PyYAML>=6.0
+astroquery>=0.4.6 

@@ -1,0 +1,9 @@
+# macOS-compatible requirements for Sub-Exposure Calculator
+# Note: pyindi-client is not included as it requires INDI development headers
+# which are not easily available on macOS. Use demo_mode.py for testing.
+
+astropy>=5.0.0
+numpy>=1.21.0
+pytz>=2021.1
+matplotlib>=3.5.0  # For plotting results
+scipy>=1.7.0       # For additional statistical functions 

@@ -1,0 +1,91 @@
+# Sub-Exposure Calculator Configuration Example
+# Copy this file to config.yaml and modify as needed
+
+# INDI Server Configuration
+indi:
+  host: localhost
+  port: 7624
+  timeout: 30  # seconds
+
+# Device Names (leave empty for auto-discovery)
+devices:
+  camera_name: ""  # e.g., "ZWO CCD ASI1600MM Pro"
+  mount_name: ""   # e.g., "SkyWatcher EQ6-R Pro"
+  filter_wheel_name: ""  # e.g., "ZWO EFW"
+  guide_camera_name: ""  # e.g., "ZWO ASI120MM Mini"
+
+# Experiment Parameters
+experiment:
+  scout_exposure_time: 60  # seconds for initial sky brightness measurement
+  exposure_times: [60, 120, 180, 240, 300, 420, 600]  # seconds (for demo mode)
+  frames_per_light: 5
+  frames_per_dark: 20
+  target_noise_ratio: 10.0
+  fwhm_degradation_threshold: 1.1  # 1.1 = 10% degradation allowed
+  skip_dark_library: false  # Skip dark frame library creation
+
+# Refinement Phase Parameters
+refinement:
+  enabled: false  # Enable high-precision refinement phase
+  steps: 3  # Number of granular steps on each side of initial optimal exposure
+  step_size: 15  # Duration in seconds of each granular step
+
+# Paths
+paths:
+  calibration_path: "./calibration"
+  results_path: "./results"
+
+# Location for zenith calculations and optimal target finding (required for optimal target finding)
+location:
+  latitude: 40.7128  # degrees
+  longitude: -74.0060  # degrees
+  elevation: 10  # meters
+
+# Camera-specific settings
+camera:
+  default_gain: 1.0
+  default_read_noise: 5.0
+  image_format: "FITS"
+  binning: [1, 1]  # [x, y]
+
+# Mount settings
+mount:
+  slew_rate: "SLEW_GUIDE"  # SLEW_GUIDE, SLEW_CENTERING, SLEW_FIND
+  tracking_rate: "TRACK_SIDEREAL"
+  settle_time: 10  # seconds after slew
+  slewing:
+    wait_time: 15  # seconds to wait for mount to arrive and settle after slew command
+  zenith_tracking:
+    enabled: true  # Enable automatic zenith tracking during experiments
+    interval: 30  # minutes - recalculate zenith every 30 minutes
+    threshold: 2.0  # degrees - slew if drift exceeds 2°
+  target_selection:
+    eastern_preference_weight: 0.3  # Weight for eastern preference (0.0-1.0, higher = more eastern bias)
+    separation_quality_weight: 0.5  # Weight for separation from bright stars (0.0-1.0)
+    meridian_flip_avoidance_weight: 0.2  # Weight for avoiding meridian flips (0.0-1.0, higher = more avoidance)
+
+# Filter wheel settings
+filter_wheel:
+  settle_time: 2  # seconds after filter change
+  default_filters: ["Luminance", "Red", "Green", "Blue", "Ha", "OIII", "SII"]
+
+# Guiding settings
+guiding:
+  exposure_time: 2.0  # seconds for guide camera
+  calibration_time: 5.0  # seconds for guide calibration
+  max_pulse: 1000  # milliseconds for maximum guide pulse
+  aggressiveness: 0.5  # 0.0-1.0 guide aggressiveness factor
+  dither_threshold: 0.5  # pixels for guide dither threshold
+
+# Analysis settings
+analysis:
+  sky_region_fraction: 0.8  # Use 80% of image for sky analysis
+  sigma_clip_threshold: 3.0  # Sigma clipping threshold
+  min_valid_pixels: 1000  # Minimum pixels for valid analysis
+
+# Output settings
+output:
+  save_raw_frames: false
+  save_calibrated_frames: false
+  save_analysis_plots: true
+  verbose_logging: true 
