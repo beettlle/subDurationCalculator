@@ -14,12 +14,49 @@ import numpy as np
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
+# Universal symbol system for cross-platform compatibility
+class Symbols:
+    """Universal symbol system that works across all terminals and operating systems."""
+    
+    # Success/Completion symbols
+    SUCCESS = "[OK]"      # Instead of ✅
+    CHECK = "[OK]"        # Alternative for ✅
+    
+    # Star/Best symbols
+    STAR = "[*]"          # Instead of ⭐
+    BEST = "[BEST]"       # Alternative for ⭐
+    
+    # Action/Process symbols
+    FOCUS = "[FOCUS]"     # Instead of 🔍
+    SWITCH = "[SWITCH]"   # Instead of 🎨
+    CAMERA = "[CAM]"      # Instead of 📸
+    WARNING = "[WARN]"    # Instead of ⚠️
+    TARGET = "[TARGET]"   # Instead of 🎯
+    REFRESH = "[REFRESH]" # Instead of 🔄
+    INFO = "[INFO]"       # Instead of ℹ️
+    ERROR = "[ERROR]"     # Instead of ❌
+    LOCATION = "[LOC]"    # Instead of 📍
+    SUNRISE = "[SUNRISE]" # Instead of 🌅
+    UNIVERSE = "[UNIV]"   # Instead of 🌌
+    TELESCOPE = "[TEL]"   # Instead of 🔭
+    CONNECT = "[CONN]"    # Instead of 🔌
+    DISCONNECT = "[DISC]" # Instead of 🔌
+    STAR_EMOJI = "[STAR]" # Instead of 🌟
+    UNLOCK = "[UNLOCK]"   # Instead of 🔓
+    ROCKET = "[ROCKET]"   # Instead of 🚀
+    STOP = "[STOP]"       # Instead of 🛑
+    DISCOVER = "[DISC]"   # Instead of 🔍
+    CHART = "[CHART]"     # Instead of 📊
+
+# Global symbol instance
+SYMBOLS = Symbols()
+
 # Configuration loading
 try:
     import yaml
     YAML_AVAILABLE = True
 except ImportError:
-    print("{SYMBOLS.WARNING}  Warning: PyYAML not available. Using default configuration.")
+    print(f"{SYMBOLS.WARNING} Warning: PyYAML not available. Using default configuration.")
     YAML_AVAILABLE = False
 
 # Image quality analysis imports (for demo simulation)
@@ -29,7 +66,7 @@ try:
     from scipy import ndimage
     PHOTUTILS_AVAILABLE = True
 except ImportError:
-    print("{SYMBOLS.WARNING}  Warning: photutils not available. Using fallback star detection method.")
+    print(f"{SYMBOLS.WARNING} Warning: photutils not available. Using fallback star detection method.")
     PHOTUTILS_AVAILABLE = False
 
 class DemoSubExposureCalculator:
@@ -100,10 +137,10 @@ class DemoSubExposureCalculator:
                     print(f"{SYMBOLS.SUCCESS} Loaded configuration from {config_path}")
                     return config
                 except Exception as e:
-                    print(f"{SYMBOLS.WARNING}  Error loading {config_path}: {e}")
+                    print(f"{SYMBOLS.WARNING} Error loading {config_path}: {e}")
         
         # Return default configuration if no file found
-        print("{SYMBOLS.WARNING}  No configuration file found, using defaults")
+        print(f"{SYMBOLS.WARNING} No configuration file found, using defaults")
         return {
             'analysis': {
                 'sky_region_fraction': 0.8,
@@ -120,7 +157,7 @@ class DemoSubExposureCalculator:
         """Simulate device discovery."""
         print("[CONN] Connecting to INDI server...")
         time.sleep(1)
-        print("{SYMBOLS.SUCCESS} Connected to INDI server successfully")
+        print(f"{SYMBOLS.SUCCESS} Connected to INDI server successfully")
         
         print("[FOCUS] Discovering INDI devices...")
         time.sleep(0.5)
@@ -167,7 +204,7 @@ class DemoSubExposureCalculator:
         
         print("\n[UNLOCK] Please uncover the telescope and press Enter when ready...")
         input()
-        print("{SYMBOLS.SUCCESS} Dark frame library complete - ready for intelligent scout experiment")
+        print(f"{SYMBOLS.SUCCESS} Dark frame library complete - ready for intelligent scout experiment")
     
     def simulate_slew_to_zenith(self):
         """Simulate slewing to zenith."""
@@ -175,7 +212,7 @@ class DemoSubExposureCalculator:
         time.sleep(2)
         print("⏳ Waiting for slew to complete...")
         time.sleep(3)
-        print("{SYMBOLS.SUCCESS} Slew to zenith completed")
+        print(f"{SYMBOLS.SUCCESS} Slew to zenith completed")
     
     def simulate_start_guiding(self):
         """Simulate starting the guiding process."""
@@ -185,13 +222,13 @@ class DemoSubExposureCalculator:
         time.sleep(1)
         print("  [FOCUS] Finding guide stars...")
         time.sleep(1)
-        print("  {SYMBOLS.STAR} Selected guide star at position: (256.5, 128.3)")
+        print(f"  {SYMBOLS.STAR} Selected guide star at position: (256.5, 128.3)")
         print("  [TARGET] Starting guiding thread...")
         time.sleep(1)
         print("  ⏳ Waiting for guiding to stabilize...")
         time.sleep(2)
-        print("{SYMBOLS.SUCCESS} Built-in guiding started successfully")
-        print("{SYMBOLS.SUCCESS} Using built-in guiding system")
+        print(f"{SYMBOLS.SUCCESS} Built-in guiding started successfully")
+        print(f"{SYMBOLS.SUCCESS} Using built-in guiding system")
     
     def simulate_focusing(self, filter_name: str) -> bool:
         """
@@ -595,9 +632,9 @@ class DemoSubExposureCalculator:
             print("    [FOCUS] Performing filter-aware focusing...")
             focusing_success = self.simulate_focusing(filter_name)
             if not focusing_success:
-                print("    {SYMBOLS.WARNING}  Warning: Focusing failed, continuing with current focus position")
+                print(f"    {SYMBOLS.WARNING} Warning: Focusing failed, continuing with current focus position")
             else:
-                print("    {SYMBOLS.SUCCESS} Focusing completed successfully")
+                print(f"    {SYMBOLS.SUCCESS} Focusing completed successfully")
             
             # Get camera properties for this filter
             self.camera_properties = self.simulate_camera_properties(filter_name)
@@ -737,9 +774,9 @@ class DemoSubExposureCalculator:
             # Check for warnings
             warning = ""
             if optimal_exp > 600:  # 10 minutes
-                warning = " {SYMBOLS.WARNING}  LONG EXPOSURE"
+                warning = f" {SYMBOLS.WARNING} LONG EXPOSURE"
             elif optimal_exp > 300:  # 5 minutes
-                warning = " {SYMBOLS.WARNING}  MODERATE EXPOSURE"
+                warning = f" {SYMBOLS.WARNING} MODERATE EXPOSURE"
             
             print(f"{filter_name:<15} {optimal_exp:<15.1f}{refinement_marker:<15} {gain:<8.2f} {read_noise:<12.2f} {target_adu:<12.1f} {scout_fwhm_str:<12} {median_fwhm:<12} {median_ecc:<10}{warning}")
         
@@ -772,7 +809,7 @@ class DemoSubExposureCalculator:
             print(f"  • High-precision bracketing search completed for optimal image quality")
         
         if any(r['optimal_exposure'] > 600 for r in self.results.values()):
-            print("\n{SYMBOLS.WARNING}  WARNING: Some exposures are very long (>10 minutes)")
+            print(f"\n{SYMBOLS.WARNING} WARNING: Some exposures are very long (>10 minutes)")
             print("  Consider using a higher gain setting or accepting lower SNR")
     
     def run(self):
@@ -780,7 +817,7 @@ class DemoSubExposureCalculator:
         try:
             print("[STAR] Sub-Exposure Calculator v6.1 - DEMO MODE")
             print("=" * 60)
-            print("{SYMBOLS.WARNING}  This is a DEMO version with simulated data")
+            print(f"{SYMBOLS.WARNING} This is a DEMO version with simulated data")
             print("   Use the real script for actual measurements")
             print("[FOCUS] ADVANCED FOCUSING ENABLED - Filter-aware focusing system")
             print("[STAR] DYNAMIC SEEING ADJUSTMENT ENABLED - Automatic frames_per_light adjustment")
@@ -801,7 +838,7 @@ class DemoSubExposureCalculator:
             self.print_results()
             
         except KeyboardInterrupt:
-            print("\n{SYMBOLS.WARNING}  Demo interrupted by user")
+            print(f"\n{SYMBOLS.WARNING} Demo interrupted by user")
         except Exception as e:
             print(f"\n[ERROR] Error during demo execution: {e}")
             import traceback
