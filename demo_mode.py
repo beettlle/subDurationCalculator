@@ -53,6 +53,15 @@ class DemoSubExposureCalculator:
         self.sigma_clip_threshold = self.config.get('analysis', {}).get('sigma_clip_threshold', 3.0)
         self.min_valid_pixels = self.config.get('analysis', {}).get('min_valid_pixels', 1000)
         
+        # Demo filter names
+        self.filter_names = ['Luminance', 'Red', 'Green', 'Blue', 'Ha', 'OIII', 'SII']
+        
+        # Demo camera properties (will be overridden by config values)
+        self.camera_properties = {
+            'gain': 1.0,
+            'read_noise': 5.2
+        }
+        
         # Update camera properties from config
         camera_config = self.config.get('camera', {})
         self.camera_properties['gain'] = camera_config.get('default_gain', 1.0)
@@ -62,15 +71,6 @@ class DemoSubExposureCalculator:
         self.refine_exposure = getattr(args, 'refine_exposure', False)
         self.refinement_steps = getattr(args, 'refinement_steps', 2)
         self.refinement_step_size = getattr(args, 'refinement_step_size', 15)
-        
-        # Demo filter names
-        self.filter_names = ['Luminance', 'Red', 'Green', 'Blue', 'Ha', 'OIII', 'SII']
-        
-        # Demo camera properties (will be overridden by config values)
-        self.camera_properties = {
-            'gain': 1.0,
-            'read_noise': 5.2
-        }
         
         # Results storage
         self.results = {}
